@@ -567,13 +567,28 @@ func (e *Element) ChildCount() uint {
 	return count
 }
 
-// func (e *Element) Child(index uint) *Element {
-// 	var child C.HELEMENT
-// 	if ret := C.HTMLayoutGetNthChild(e.handle, C.UINT(index), &child); ret != HLDOM_OK {
-// 		domPanic(ret, "Failed to get child at index: ", index)
-// 	}
-// 	return NewElementFromHandle(HELEMENT(child))
-// }
+/**Get handle of every element's child element.
+ * \param[in] he \b #HELEMENT
+ * \param[in] n \b UINT, number of the child element
+ * \param[out] phe \b #HELEMENT*, variable to receive handle of the child
+ * element
+ * \return \b #HLDOM_RESULT
+ *
+ * \par Example:
+ * for paragraph defined as
+ * \verbatim <p>Hello <b>wonderfull</b> world!</p> \endverbatim
+ * *phe will be equal to handle of &lt;b&gt; element:
+ * \verbatim <b>wonderfull</b> \endverbatim
+ **/
+// EXTERN_C  HLDOM_RESULT HLAPI HTMLayoutGetNthChild(HELEMENT he, UINT n, HELEMENT* phe);
+//sys HTMLayoutGetNthChild(he HELEMENT, n uint, phe *HELEMENT) (ret HLDOM_RESULT) = htmlayout.HTMLayoutGetNthChild
+func (e *Element) Child(index uint) *Element {
+	var child HELEMENT
+	if ret := HTMLayoutGetNthChild(e.handle, index, &child); ret != HLDOM_OK {
+		domPanic2(ret, "Failed to get child at index: ", index)
+	}
+	return NewElementFromHandle(child)
+}
 
 // func (e *Element) Children() []*Element {
 // 	slice := make([]*Element, 0, 32)

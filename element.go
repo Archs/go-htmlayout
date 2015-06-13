@@ -491,26 +491,56 @@ func (e *Element) SelectParentLimit(selector string, depth int) *Element {
 	return nil
 }
 
-// func (e *Element) SelectParent(selector string) *Element {
-// 	return e.SelectParentLimit(selector, 0)
-// }
+func (e *Element) SelectParent(selector string) *Element {
+	return e.SelectParentLimit(selector, 0)
+}
 
-// // For delivering programmatic events to this element.
-// // Returns true if the event was handled, false otherwise
-// func (e *Element) SendEvent(eventCode uint, source *Element, reason uint32) bool {
-// 	var handled C.BOOL = 0
-// 	if ret := C.HTMLayoutSendEvent(e.handle, C.UINT(eventCode), source.handle, C.UINT_PTR(reason), &handled); ret != HLDOM_OK {
-// 		domPanic(ret, "Failed to send event")
-// 	}
-// 	return handled != 0
-// }
+/** SendEvent - sends sinking/bubbling event to the child/parent chain of he element.
+   First event will be send in SINKING mode (with SINKING flag) - from root to he element itself.
+   Then from he element to its root on parents chain without SINKING flag (bubbling phase).
 
-// // For asynchronously delivering programmatic events to this element.
-// func (e *Element) PostEvent(eventCode uint, source *Element, reason uint32) {
-// 	if ret := C.HTMLayoutPostEvent(e.handle, C.UINT(eventCode), source.handle, C.UINT(reason)); ret != HLDOM_OK {
-// 		domPanic(ret, "Failed to post event")
-// 	}
-// }
+* \param[in] he \b HELEMENT, element to send this event to.
+* \param[in] appEventCode \b UINT, event ID, see: #BEHAVIOR_EVENTS
+* \param[in] heSource \b HELEMENT, optional handle of the source element, e.g. some list item
+* \param[in] reason \b UINT, notification specific event reason code
+* \param[out] handled \b BOOL*, variable to receive TRUE if any handler handled it, FALSE otherwise.
+
+**/
+
+// EXTERN_C HLDOM_RESULT HLAPI HTMLayoutSendEvent(
+//           HELEMENT he, UINT appEventCode, HELEMENT heSource, UINT_PTR reason, /*out*/ BOOL* handled);
+//sys HTMLayoutSendEvent(he HELEMENT, appEventCode uint, heSource HELEMENT, reason *uint, handled *BOOL) (ret HLDOM_RESULT) = htmlayout.HTMLayoutSendEvent
+
+// For delivering programmatic events to this element.
+// Returns true if the event was handled, false otherwise
+func (e *Element) SendEvent(eventCode uint, source *Element, reason uint) bool {
+	var handled BOOL = 0
+	if ret := HTMLayoutSendEvent(e.handle, eventCode, source.handle, &reason, &handled); ret != HLDOM_OK {
+		domPanic2(ret, "Failed to send event")
+	}
+	return handled != 0
+}
+
+/** PostEvent - post sinking/bubbling event to the child/parent chain of he element.
+ *  Function will return immediately posting event into input queue of the application.
+ *
+ * \param[in] he \b HELEMENT, element to send this event to.
+ * \param[in] appEventCode \b UINT, event ID, see: #BEHAVIOR_EVENTS
+ * \param[in] heSource \b HELEMENT, optional handle of the source element, e.g. some list item
+ * \param[in] reason \b UINT, notification specific event reason code
+
+ **/
+//
+// EXTERN_C HLDOM_RESULT HLAPI HTMLayoutPostEvent(
+//           HELEMENT he, UINT appEventCode, HELEMENT heSource, UINT reason);
+//sys HTMLayoutPostEvent(he HELEMENT, appEventCode uint, heSource HELEMENT, reason *uint) (ret HLDOM_RESULT) = htmlayout.HTMLayoutPostEvent
+
+// For asynchronously delivering programmatic events to this element.
+func (e *Element) PostEvent(eventCode uint, source *Element, reason uint) {
+	if ret := HTMLayoutPostEvent(e.handle, eventCode, source.handle, &reason); ret != HLDOM_OK {
+		domPanic2(ret, "Failed to post event")
+	}
+}
 
 // //
 // // DOM structure accessors/modifiers:

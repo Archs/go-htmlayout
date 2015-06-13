@@ -469,22 +469,27 @@ func (e *Element) Select(selector string) []*Element {
 	return results
 }
 
-// // Searches up the parent chain to find the first element that matches the given selector.
-// // Includes the element in the search.  Depth indicates how far the search should progress.
-// // Depth = 1 means only consider this element.  Depth = 0 means search all the way up to the
-// // root.  Any other positive value of depth limits the length of the search.
-// func (e *Element) SelectParentLimit(selector string, depth int) *Element {
-// 	szSelector := C.CString(selector)
-// 	defer C.free(unsafe.Pointer(szSelector))
-// 	var parent C.HELEMENT
-// 	if ret := C.HTMLayoutSelectParent(e.handle, (*C.CHAR)(szSelector), C.UINT(depth), &parent); ret != HLDOM_OK {
-// 		domPanic(ret, "Failed to select parent dom elements, selector: '", selector, "'")
-// 	}
-// 	if parent != nil {
-// 		return NewElementFromHandle(HELEMENT(parent))
-// 	}
-// 	return nil
-// }
+// EXTERN_C  HLDOM_RESULT HLAPI HTMLayoutSelectParentW(
+//           HELEMENT  he,
+//           LPCWSTR   selector,
+//           UINT      depth,
+//           /*out*/ HELEMENT* heFound);
+//sys HTMLayoutSelectParentW(he HELEMENT, selector string, depth uint, heFound *HELEMENT) (ret HLDOM_RESULT, err error) [failretval != 0] = htmlayout.HTMLayoutSelectParentW
+
+// Searches up the parent chain to find the first element that matches the given selector.
+// Includes the element in the search.  Depth indicates how far the search should progress.
+// Depth = 1 means only consider this element.  Depth = 0 means search all the way up to the
+// root.  Any other positive value of depth limits the length of the search.
+func (e *Element) SelectParentLimit(selector string, depth int) *Element {
+	var parent HELEMENT
+	if ret, err := HTMLayoutSelectParentW(e.handle, selector, uint(depth), &parent); err != nil {
+		domPanic2(ret, "Failed to select parent dom elements, selector: '", selector, "'")
+	}
+	if parent != 0 {
+		return NewElementFromHandle(parent)
+	}
+	return nil
+}
 
 // func (e *Element) SelectParent(selector string) *Element {
 // 	return e.SelectParentLimit(selector, 0)

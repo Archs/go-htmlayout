@@ -51,6 +51,7 @@ func WinMain(Inst win.HINSTANCE) int32 {
 	win.ShowWindow(wnd, win.SW_SHOW)
 	win.UpdateWindow(wnd)
 	// load file
+	gohl.EnableDebug()
 	if err := gohl.LoadFile(wnd, "a.html"); err != nil {
 		println("LoadFile failed", err.Error())
 		return 0

@@ -761,13 +761,23 @@ func (e *Element) CancelTimer() {
 	e.SetTimer(0)
 }
 
-// func (e *Element) Hwnd() uint32 {
-// 	var hwnd uint32
-// 	if ret := C.HTMLayoutGetElementHwnd(e.handle, (*C.HWND)(unsafe.Pointer(&hwnd)), 0); ret != HLDOM_OK {
-// 		domPanic(ret, "Failed to get element's hwnd")
-// 	}
-// 	return hwnd
-// }
+/**Get HWND of containing window.
+ * \param[in] he \b #HELEMENT
+ * \param[out] p_hwnd \b HWND*, variable to receive window handle
+ * \param[in] rootWindow \b BOOL, handle of which window to get:
+ * - TRUE - HTMLayout window
+ * - FALSE - nearest parent element having overflow:auto or :scroll
+ * \return \b #HLDOM_RESULT
+ **/
+// EXTERN_C  HLDOM_RESULT HLAPI HTMLayoutGetElementHwnd(HELEMENT he, HWND* p_hwnd, BOOL rootWindow);
+//sys HTMLayoutGetElementHwnd(he HELEMENT, p_hwnd *HWND, rootWindow BOOL) (ret HLDOM_RESULT) = htmlayout.HTMLayoutGetElementHwnd
+func (e *Element) Hwnd() win.HWND {
+	var hwnd win.HWND
+	if ret := HTMLayoutGetElementHwnd(e.handle, (*HWND)(&hwnd), 0); ret != HLDOM_OK {
+		domPanic2(ret, "Failed to get element's hwnd")
+	}
+	return hwnd
+}
 
 // func (e *Element) RootHwnd() uint32 {
 // 	var hwnd uint32

@@ -298,7 +298,7 @@ func (e *Element) finalize() {
 		for handler := range attachedHandlers {
 			tag := uintptr(unsafe.Pointer(handler))
 			println(tag)
-			// C.HTMLayoutDetachEventHandler(e.handle, (C.LPELEMENT_EVENT_PROC)(unsafe.Pointer(goElementProc)), C.LPVOID(tag))
+			HTMLayoutDetachEventHandler(uintptr(e.handle), goElementProc, tag)
 		}
 		delete(eventHandlers, e.handle)
 	}

@@ -760,6 +760,9 @@ func DataReady(hwnd win.HWND, uri string, data []byte) (bool, error) {
 // HLDOM_RESULT HLAPI HTMLayoutAttachEventHandler( HELEMENT he, LPELEMENT_EVENT_PROC pep, LPVOID tag );
 //sys HTMLayoutAttachEventHandler(he uintptr, pep uintptr, tag uintptr) (ret HLDOM_RESULT) = htmlayout.HTMLayoutAttachEventHandler
 
+// EXTERN_C HLDOM_RESULT HLAPI HTMLayoutDetachEventHandler( HELEMENT he, LPELEMENT_EVENT_PROC pep, LPVOID tag );
+//sys HTMLayoutDetachEventHandler(he uintptr, pep uintptr, tag uintptr) (ret HLDOM_RESULT) = htmlayout.HTMLayoutDetachEventHandler
+
 // EXTERN_C HLDOM_RESULT HLAPI HTMLayoutAttachEventHandlerEx( HELEMENT he, LPELEMENT_EVENT_PROC pep, LPVOID tag, UINT subscription );
 //sys HTMLayoutAttachEventHandlerEx(he uintptr, pep uintptr, tag uintptr, subscription uint) (ret HLDOM_RESULT) = htmlayout.HTMLayoutAttachEventHandlerEx
 

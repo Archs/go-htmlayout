@@ -65,7 +65,7 @@ func WinMain(Inst win.HINSTANCE) int32 {
 // func DefWindowProc(hWnd HWND, Msg uint32, wParam, lParam uintptr) uintptr
 func WndProc(hWnd win.HWND, message uint32, wParam uintptr, lParam uintptr) uintptr {
 	var pbHandled gohl.BOOL
-	ret, handled := gohl.ProcNoDefault(uint32(hWnd), message, wParam, lParam)
+	ret, handled := gohl.ProcNoDefault(hWnd, message, wParam, lParam)
 	if handled {
 		return uintptr(ret)
 	}
@@ -74,7 +74,7 @@ func WndProc(hWnd win.HWND, message uint32, wParam uintptr, lParam uintptr) uint
 	}
 	switch message {
 	case win.WM_CREATE:
-		if err := gohl.LoadFile(uint32(hWnd), "a.html"); err != nil {
+		if err := gohl.LoadFile(hWnd, "a.html"); err != nil {
 			println("LoadFile failed", err.Error())
 		}
 	default:

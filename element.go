@@ -703,11 +703,20 @@ func (e *Element) Clone() *Element {
 	return NewElementFromHandle(clone)
 }
 
-// func (e *Element) Swap(other *Element) {
-// 	if ret := C.HTMLayoutSwapElements(e.handle, other.handle); ret != HLDOM_OK {
-// 		domPanic(ret, "Failed to swap elements")
-// 	}
-// }
+/** HTMLayoutSwapElements - swap element positions.
+ * Function changes "insertion points" of two elements. So it swops indexes and parents of two elements.
+ * \param[in] he1 \b HELEMENT, first element.
+ * \param[in] he2 \b HELEMENT, second element.
+ **/
+//
+// EXTERN_C HLDOM_RESULT HLAPI HTMLayoutSwapElements(
+//          HELEMENT he1, HELEMENT he2 );
+//sys HTMLayoutSwapElements(he HELEMENT, other HELEMENT) (ret HLDOM_RESULT) = htmlayout.HTMLayoutSwapElements
+func (e *Element) Swap(other *Element) {
+	if ret := HTMLayoutSwapElements(e.handle, other.handle); ret != HLDOM_OK {
+		domPanic2(ret, "Failed to swap elements")
+	}
+}
 
 // // Sorts 'count' child elements starting at index 'start'.  Uses comparator to define the
 // // order.  Comparator should return -1, or 0, or 1 to indicate less, equal or greater

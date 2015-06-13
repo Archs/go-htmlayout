@@ -6,6 +6,7 @@ import "C"
 
 import (
 	"github.com/lxn/win"
+
 	// "errors"
 	"fmt"
 	// "reflect"
@@ -836,13 +837,30 @@ func (e *Element) Type() string {
 	return C.GoString(data)
 }
 
-// func (e *Element) SetHtml(html string) {
-// 	szHtml := C.CString(html)
-// 	defer C.free(unsafe.Pointer(szHtml))
-// 	if ret := C.HTMLayoutSetElementHtml(e.handle, (*C.BYTE)(unsafe.Pointer(szHtml)), C.DWORD(len(html)), SIH_REPLACE_CONTENT); ret != HLDOM_OK {
-// 		domPanic(ret, "Failed to replace element's html")
-// 	}
-// }
+/**Set inner or outer html of the element.
+ * \param[in] he \b #HELEMENT
+ * \param[in] html \b LPCBYTE, UTF-8 encoded string containing html text
+ * \param[in] htmlLength \b DWORD, length in bytes of \c html.
+ * \param[in] where \b UINT, possible values are:
+ * - SIH_REPLACE_CONTENT - replace content of the element
+ * - SIH_INSERT_AT_START - insert html before first child of the element
+ * - SIH_APPEND_AFTER_LAST - insert html after last child of the element
+ *
+ * - SOH_REPLACE - replace element by html, a.k.a. element.outerHtml = "something"
+ * - SOH_INSERT_BEFORE - insert html before the element
+ * - SOH_INSERT_AFTER - insert html after the element
+ *   ATTN: SOH_*** operations do not work for inline elements like <SPAN>
+ *
+ * \return /b #HLDOM_RESULT
+  **/
+// EXTERN_C HLDOM_RESULT HLAPI
+//       HTMLayoutSetElementHtml(HELEMENT he, LPCBYTE html, DWORD htmlLength, UINT where);
+//sys HTMLayoutSetElementHtml(he HELEMENT, html string, htmlLength int, where uint) (ret HLDOM_RESULT, err error) [failretval != 0] = htmlayout.HTMLayoutSetElementHtml
+func (e *Element) SetHtml(html string) {
+	if ret, err := HTMLayoutSetElementHtml(e.handle, html, len(html), SIH_REPLACE_CONTENT); err != nil {
+		domPanic2(ret, "Failed to replace element's html")
+	}
+}
 
 // func (e *Element) PrependHtml(prefix string) {
 // 	szHtml := C.CString(prefix)

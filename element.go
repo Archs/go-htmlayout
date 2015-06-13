@@ -862,21 +862,17 @@ func (e *Element) SetHtml(html string) {
 	}
 }
 
-// func (e *Element) PrependHtml(prefix string) {
-// 	szHtml := C.CString(prefix)
-// 	defer C.free(unsafe.Pointer(szHtml))
-// 	if ret := C.HTMLayoutSetElementHtml(e.handle, (*C.BYTE)(unsafe.Pointer(szHtml)), C.DWORD(len(prefix)), SIH_INSERT_AT_START); ret != HLDOM_OK {
-// 		domPanic(ret, "Failed to prepend to element's html")
-// 	}
-// }
+func (e *Element) PrependHtml(prefix string) {
+	if ret, err := HTMLayoutSetElementHtml(e.handle, prefix, len(prefix), SIH_INSERT_AT_START); err != nil {
+		domPanic2(ret, "Failed to replace element's html")
+	}
+}
 
-// func (e *Element) AppendHtml(suffix string) {
-// 	szHtml := C.CString(suffix)
-// 	defer C.free(unsafe.Pointer(szHtml))
-// 	if ret := C.HTMLayoutSetElementHtml(e.handle, (*C.BYTE)(unsafe.Pointer(szHtml)), C.DWORD(len(suffix)), SIH_APPEND_AFTER_LAST); ret != HLDOM_OK {
-// 		domPanic(ret, "Failed to append to element's html")
-// 	}
-// }
+func (e *Element) AppendHtml(suffix string) {
+	if ret, err := HTMLayoutSetElementHtml(e.handle, suffix, len(suffix), SIH_APPEND_AFTER_LAST); err != nil {
+		domPanic2(ret, "Failed to replace element's html")
+	}
+}
 
 // func (e *Element) SetText(text string) {
 // 	szText := C.CString(text)

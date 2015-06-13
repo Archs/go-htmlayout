@@ -77,7 +77,9 @@ const (
 	MEASURE_INPLACE  = 0x0001 // use this flag if you do not expect any dimensional changes - this is faster than REMEASURE
 	MEASURE_DEEP     = 0x0002 // use this flag if changes of some attributes/content may cause change of dimensions of the element
 	REDRAW_NOW       = 0x8000
+)
 
+var (
 	BAD_HELEMENT = HELEMENT(unsafe.Pointer(uintptr(0)))
 )
 
@@ -381,7 +383,7 @@ func (e *Element) Select(selector string) []*Element {
 	szSelector := C.CString(selector)
 	defer C.free(unsafe.Pointer(szSelector))
 	results := make([]*Element, 0, 32)
-	if ret := C.HTMLayoutSelectElements(e.handle, (*C.CHAR)(szSelector), (*[0]byte)(unsafe.Pointer(goSelectCallback)), C.LPVOID(unsafe.Pointer(&results))); ret != HLDOM_OK {
+	if ret := C.HTMLayoutSelectElements(e.handle, (*C.CHAR)(szSelector), (*C.HTMLayoutElementCallback)(unsafe.Pointer(goSelectCallback)), C.LPVOID(unsafe.Pointer(&results))); ret != HLDOM_OK {
 		domPanic(ret, "Failed to select dom elements, selector: '", selector, "'")
 	}
 	return results
@@ -518,7 +520,7 @@ func (e *Element) Swap(other *Element) {
 func (e *Element) SortChildrenRange(start, count uint, comparator func(*Element, *Element) int) {
 	end := start + count
 	arg := uintptr(unsafe.Pointer(&comparator))
-	if ret := C.HTMLayoutSortElements(e.handle, C.UINT(start), C.UINT(end), (*[0]byte)(unsafe.Pointer(goElementComparator)), C.LPVOID(arg)); ret != HLDOM_OK {
+	if ret := C.HTMLayoutSortElements(e.handle, C.UINT(start), C.UINT(end), (*C.ELEMENT_COMPARATOR)(unsafe.Pointer(goElementComparator)), C.LPVOID(arg)); ret != HLDOM_OK {
 		domPanic(ret, "Failed to sort elements")
 	}
 }

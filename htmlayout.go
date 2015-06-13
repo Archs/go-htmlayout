@@ -10,8 +10,8 @@ package gohl
 import "C"
 
 import (
-	"log"
 	"errors"
+	"log"
 	"syscall"
 	"unsafe"
 )
@@ -47,8 +47,8 @@ const (
 	HANDLE_SIZE           = C.HANDLE_SIZE           /** size changed event */
 	HANDLE_DRAW           = C.HANDLE_DRAW           /** drawing request (event) */
 	HANDLE_DATA_ARRIVED   = C.HANDLE_DATA_ARRIVED   /** requested data () has been delivered */
-	HANDLE_BEHAVIOR_EVENT = C.HANDLE_BEHAVIOR_EVENT /** secondary, synthetic events: 
-	BUTTON_CLICK, HYPERLINK_CLICK, etc., 
+	HANDLE_BEHAVIOR_EVENT = C.HANDLE_BEHAVIOR_EVENT /** secondary, synthetic events:
+	BUTTON_CLICK, HYPERLINK_CLICK, etc.,
 	a.k.a. notifications from intrinsic behaviors */
 	HANDLE_METHOD_CALL     = C.HANDLE_METHOD_CALL     /** behavior specific methods */
 	HANDLE_EXCHANGE        = C.HANDLE_EXCHANGE        /** system drag-n-drop */
@@ -87,9 +87,9 @@ const (
 	MOUSE_WHEEL  = C.MOUSE_WHEEL
 	MOUSE_TICK   = C.MOUSE_TICK   // mouse pressed ticks
 	MOUSE_IDLE   = C.MOUSE_IDLE   // mouse stay idle for some time
-	DROP         = C.DROP         // item dropped, target is that dropped item 
-	DRAG_ENTER   = C.DRAG_ENTER   // drag arrived to the target element that is one of current drop targets.  
-	DRAG_LEAVE   = C.DRAG_LEAVE   // drag left one of current drop targets. target is the drop target element.  
+	DROP         = C.DROP         // item dropped, target is that dropped item
+	DRAG_ENTER   = C.DRAG_ENTER   // drag arrived to the target element that is one of current drop targets.
+	DRAG_LEAVE   = C.DRAG_LEAVE   // drag left one of current drop targets. target is the drop target element.
 	DRAG_REQUEST = C.DRAG_REQUEST // drag src notification before drag start. To cancel - return true from handler.
 	MOUSE_CLICK  = C.MOUSE_CLICK  // mouse click event
 	DRAGGING     = C.DRAGGING     // This flag is 'ORed' with MOUSE_ENTER..MOUSE_DOWN codes if dragging operation is in effect.
@@ -105,12 +105,12 @@ const (
 	CURSOR_SIZENESW    = C.CURSOR_SIZENESW    //6
 	CURSOR_SIZEWE      = C.CURSOR_SIZEWE      //7
 	CURSOR_SIZENS      = C.CURSOR_SIZENS      //8
-	CURSOR_SIZEALL     = C.CURSOR_SIZEALL     //9 
+	CURSOR_SIZEALL     = C.CURSOR_SIZEALL     //9
 	CURSOR_NO          = C.CURSOR_NO          //10
 	CURSOR_APPSTARTING = C.CURSOR_APPSTARTING //11
 	CURSOR_HELP        = C.CURSOR_HELP        //12
 	CURSOR_HAND        = C.CURSOR_HAND        //13
-	CURSOR_DRAG_MOVE   = C.CURSOR_DRAG_MOVE   //14 
+	CURSOR_DRAG_MOVE   = C.CURSOR_DRAG_MOVE   //14
 	CURSOR_DRAG_COPY   = C.CURSOR_DRAG_COPY   //15
 
 	// KeyEvents
@@ -190,12 +190,12 @@ const (
 	// BehaviorEvents
 	BUTTON_CLICK             = C.BUTTON_CLICK             // click on button
 	BUTTON_PRESS             = C.BUTTON_PRESS             // mouse down or key down in button
-	BUTTON_STATE_CHANGED     = C.BUTTON_STATE_CHANGED     // checkbox/radio/slider changed its state/value 
+	BUTTON_STATE_CHANGED     = C.BUTTON_STATE_CHANGED     // checkbox/radio/slider changed its state/value
 	EDIT_VALUE_CHANGING      = C.EDIT_VALUE_CHANGING      // before text change
 	EDIT_VALUE_CHANGED       = C.EDIT_VALUE_CHANGED       // after text change
 	SELECT_SELECTION_CHANGED = C.SELECT_SELECTION_CHANGED // selection in <select> changed
 	SELECT_STATE_CHANGED     = C.SELECT_STATE_CHANGED     // node in select expanded/collapsed, heTarget is the node
-	POPUP_REQUEST            = C.POPUP_REQUEST            // request to show popup just received, 
+	POPUP_REQUEST            = C.POPUP_REQUEST            // request to show popup just received,
 	//     here DOM of popup element can be modifed.
 	POPUP_READY = C.POPUP_READY // popup element has been measured and ready to be shown on screen,
 	//     here you can use functions like ScrollToView.
@@ -203,34 +203,34 @@ const (
 	//     here DOM of popup element can be modifed again - e.g. some items can be removed
 	//     to free memory.
 	MENU_ITEM_ACTIVE = C.MENU_ITEM_ACTIVE // menu item activated by mouse hover or by keyboard,
-	MENU_ITEM_CLICK  = C.MENU_ITEM_CLICK  // menu item click, 
+	MENU_ITEM_CLICK  = C.MENU_ITEM_CLICK  // menu item click,
 	//   BEHAVIOR_EVENT_PARAMS structure layout
-	//   BEHAVIOR_EVENT_PARAMS.cmd - MENU_ITEM_CLICK/MENU_ITEM_ACTIVE   
+	//   BEHAVIOR_EVENT_PARAMS.cmd - MENU_ITEM_CLICK/MENU_ITEM_ACTIVE
 	//   BEHAVIOR_EVENT_PARAMS.heTarget - the menu item, presumably <li> element
 	//   BEHAVIOR_EVENT_PARAMS.reason - BY_MOUSE_CLICK | BY_KEY_CLICK
-	CONTEXT_MENU_SETUP   = C.CONTEXT_MENU_SETUP   // evt.he is a menu dom element that is about to be shown. You can disable/enable items in it.      
+	CONTEXT_MENU_SETUP   = C.CONTEXT_MENU_SETUP   // evt.he is a menu dom element that is about to be shown. You can disable/enable items in it.
 	CONTEXT_MENU_REQUEST = C.CONTEXT_MENU_REQUEST // "right-click", BEHAVIOR_EVENT_PARAMS::he is current popup menu HELEMENT being processed or NULL.
 	// application can provide its own HELEMENT here (if it is NULL) or modify current menu element.
-	VISIUAL_STATUS_CHANGED  = C.VISIUAL_STATUS_CHANGED  // broadcast notification, sent to all elements of some container being shown or hidden   
+	VISIUAL_STATUS_CHANGED  = C.VISIUAL_STATUS_CHANGED  // broadcast notification, sent to all elements of some container being shown or hidden
 	DISABLED_STATUS_CHANGED = C.DISABLED_STATUS_CHANGED // broadcast notification, sent to all elements of some container that got new value of :disabled state
 	POPUP_DISMISSING        = C.POPUP_DISMISSING        // popup is about to be closed
 
-	// "grey" event codes  - notfications from behaviors from this SDK 
+	// "grey" event codes  - notfications from behaviors from this SDK
 	HYPERLINK_CLICK    = C.HYPERLINK_CLICK    // hyperlink click
-	TABLE_HEADER_CLICK = C.TABLE_HEADER_CLICK // click on some cell in table header, 
-	//     target = C.the cell, 
+	TABLE_HEADER_CLICK = C.TABLE_HEADER_CLICK // click on some cell in table header,
+	//     target = C.the cell,
 	//     reason = C.index of the cell (column number, 0..n)
 	TABLE_ROW_CLICK = C.TABLE_ROW_CLICK // click on data row in the table, target is the row
-	//     target = C.the row, 
+	//     target = C.the row,
 	//     reason = C.index of the row (fixed_rows..n)
 	TABLE_ROW_DBL_CLICK = C.TABLE_ROW_DBL_CLICK // mouse dbl click on data row in the table, target is the row
-	//     target = C.the row, 
+	//     target = C.the row,
 	//     reason = C.index of the row (fixed_rows..n)
 	ELEMENT_COLLAPSED = C.ELEMENT_COLLAPSED // element was collapsed, so far only behavior:tabs is sending these two to the panels
 	ELEMENT_EXPANDED  = C.ELEMENT_EXPANDED  // element was expanded,
-	ACTIVATE_CHILD    = C.ACTIVATE_CHILD    // activate (select) child, 
-	// used for example by accesskeys behaviors to send activation request, e.g. tab on behavior:tabs. 
-	DO_SWITCH_TAB = C.DO_SWITCH_TAB // command to switch tab programmatically, handled by behavior:tabs 
+	ACTIVATE_CHILD    = C.ACTIVATE_CHILD    // activate (select) child,
+	// used for example by accesskeys behaviors to send activation request, e.g. tab on behavior:tabs.
+	DO_SWITCH_TAB = C.DO_SWITCH_TAB // command to switch tab programmatically, handled by behavior:tabs
 	// use it as HTMLayoutPostEvent(tabsElementOrItsChild, DO_SWITCH_TAB, tabElementToShow, 0);
 	INIT_DATA_VIEW    = C.INIT_DATA_VIEW    // request to virtual grid to initialize its view
 	ROWS_DATA_REQUEST = C.ROWS_DATA_REQUEST // request from virtual grid to data source behavior to fill data in the table
@@ -238,11 +238,11 @@ const (
 	UI_STATE_CHANGED = C.UI_STATE_CHANGED // ui state changed, observers shall update their visual states.
 	// is sent for example by behavior:richtext when caret position/selection has changed.
 	FORM_SUBMIT = C.FORM_SUBMIT // behavior:form detected submission event. BEHAVIOR_EVENT_PARAMS::data field contains data to be posted.
-	// BEHAVIOR_EVENT_PARAMS::data is of type T_MAP in this case key/value pairs of data that is about 
+	// BEHAVIOR_EVENT_PARAMS::data is of type T_MAP in this case key/value pairs of data that is about
 	// to be submitted. You can modify the data or discard submission by returning TRUE from the handler.
 	FORM_RESET = C.FORM_RESET // behavior:form detected reset event (from button type = C.reset). BEHAVIOR_EVENT_PARAMS::data field contains data to be reset.
-	// BEHAVIOR_EVENT_PARAMS::data is of type T_MAP in this case key/value pairs of data that is about 
-	// to be rest. You can modify the data or discard reset by returning TRUE from the handler.		 
+	// BEHAVIOR_EVENT_PARAMS::data is of type T_MAP in this case key/value pairs of data that is about
+	// to be rest. You can modify the data or discard reset by returning TRUE from the handler.
 	DOCUMENT_COMPLETE            = C.DOCUMENT_COMPLETE // behavior:frame have complete document.
 	HISTORY_PUSH                 = C.HISTORY_PUSH      // behavior:history stuff
 	HISTORY_DROP                 = C.HISTORY_DROP
@@ -255,7 +255,7 @@ const (
 	FIRST_APPLICATION_EVENT_CODE = C.FIRST_APPLICATION_EVENT_CODE
 	// all custom event codes shall be greater
 	// than this number. All codes below this will be used
-	// solely by application - HTMLayout will not intrepret it 
+	// solely by application - HTMLayout will not intrepret it
 	// and will do just dispatching.
 	// To send event notifications with  these codes use
 	// HTMLayoutSend/PostEvent API.
@@ -278,7 +278,7 @@ const (
 	TEXT_EDIT_GET_SELECTION = C.TEXT_EDIT_GET_SELECTION // p - TEXT_EDIT_SELECTION_PARAMS
 	TEXT_EDIT_SET_SELECTION = C.TEXT_EDIT_SET_SELECTION // p - TEXT_EDIT_SELECTION_PARAMS
 	// Replace selection content or insert text at current caret position.
-	// Replaced text will be selected. 
+	// Replaced text will be selected.
 	TEXT_EDIT_REPLACE_SELECTION = C.TEXT_EDIT_REPLACE_SELECTION // p - TEXT_EDIT_REPLACE_SELECTION_PARAMS
 	// Set value of type = C."vscrollbar"/"hscrollbar"
 	SCROLL_BAR_GET_VALUE = C.SCROLL_BAR_GET_VALUE
@@ -289,8 +289,8 @@ const (
 	TEXT_EDIT_GET_SELECTION_HTML = C.TEXT_EDIT_GET_SELECTION_HTML // p - TEXT_SELECTION_PARAMS, OutputStreamProc will receive stream of BYTEs - utf8 encoded html fragment.
 	TEXT_EDIT_CHAR_POS_AT_XY     = C.TEXT_EDIT_CHAR_POS_AT_XY     // p - TEXT_EDIT_CHAR_POS_AT_XY_PARAMS
 	IS_EMPTY                     = C.IS_EMPTY                     // p - IS_EMPTY_PARAMS // set VALUE_PARAMS::is_empty (false/true) reflects :empty state of the element.
-	GET_VALUE                    = C.GET_VALUE                    // p - VALUE_PARAMS 
-	SET_VALUE                    = C.SET_VALUE                    // p - VALUE_PARAMS 
+	GET_VALUE                    = C.GET_VALUE                    // p - VALUE_PARAMS
+	SET_VALUE                    = C.SET_VALUE                    // p - VALUE_PARAMS
 	XCALL                        = C.XCALL                        // p - XCALL_PARAMS
 	FIRST_APPLICATION_METHOD_ID  = C.FIRST_APPLICATION_METHOD_ID
 
@@ -312,21 +312,21 @@ const (
 	CONTAINER_RELATIVE = C.CONTAINER_RELATIVE // - position inside immediate container.
 	VIEW_RELATIVE      = C.VIEW_RELATIVE
 
-	T_UNDEFINED = C.T_UNDEFINED
-    T_NULL = C.T_NULL
-    T_BOOL = C.T_BOOL
-    T_INT = C.T_INT
-    T_FLOAT = C.T_FLOAT
-    T_STRING = C.T_STRING
-    T_DATE = C.T_DATE
-    T_CURRENCY = C.T_CURRENCY
-    T_LENGTH = C.T_LENGTH
-    T_ARRAY = C.T_ARRAY
-    T_MAP = C.T_MAP
-    T_FUNCTION = C.T_FUNCTION
-    T_BYTES = C.T_BYTES
-    T_OBJECT = C.T_OBJECT
-    T_DOM_OBJECT = C.T_DOM_OBJECT
+	T_UNDEFINED  = C.T_UNDEFINED
+	T_NULL       = C.T_NULL
+	T_BOOL       = C.T_BOOL
+	T_INT        = C.T_INT
+	T_FLOAT      = C.T_FLOAT
+	T_STRING     = C.T_STRING
+	T_DATE       = C.T_DATE
+	T_CURRENCY   = C.T_CURRENCY
+	T_LENGTH     = C.T_LENGTH
+	T_ARRAY      = C.T_ARRAY
+	T_MAP        = C.T_MAP
+	T_FUNCTION   = C.T_FUNCTION
+	T_BYTES      = C.T_BYTES
+	T_OBJECT     = C.T_OBJECT
+	T_DOM_OBJECT = C.T_DOM_OBJECT
 )
 
 var (
@@ -341,7 +341,6 @@ var (
 type HELEMENT C.HELEMENT
 type HLDOM_RESULT C.HLDOM_RESULT
 type VALUE_RESULT C.UINT
-
 
 type Point struct {
 	X int32
@@ -709,7 +708,7 @@ func AttachWindowEventHandler(hwnd uint32, handler *EventHandler) {
 	tag := uintptr(unsafe.Pointer(handler))
 
 	if _, exists := windowEventHandlers[hwnd]; exists {
-		if ret := C.HTMLayoutWindowDetachEventHandler(C.HWND(C.HANDLE(key)), (*[0]byte)(unsafe.Pointer(goElementProc)), C.LPVOID(tag)); ret != HLDOM_OK {
+		if ret := C.HTMLayoutWindowDetachEventHandler(C.HWND(C.HANDLE(key)), (C.LPELEMENT_EVENT_PROC)(unsafe.Pointer(goElementProc)), C.LPVOID(tag)); ret != HLDOM_OK {
 			domPanic(ret, "Failed to detach event handler from window before adding the new one")
 		}
 	}
@@ -722,7 +721,7 @@ func AttachWindowEventHandler(hwnd uint32, handler *EventHandler) {
 	subscription := handler.Subscription()
 	subscription &= ^uint32(DISABLE_INITIALIZATION & 0xffffffff)
 
-	if ret := C.HTMLayoutWindowAttachEventHandler(C.HWND(C.HANDLE(key)), (*[0]byte)(unsafe.Pointer(goElementProc)), C.LPVOID(tag), C.UINT(subscription)); ret != HLDOM_OK {
+	if ret := C.HTMLayoutWindowAttachEventHandler(C.HWND(C.HANDLE(key)), (C.LPELEMENT_EVENT_PROC)(unsafe.Pointer(goElementProc)), C.LPVOID(tag), C.UINT(subscription)); ret != HLDOM_OK {
 		domPanic(ret, "Failed to attach event handler to window")
 	}
 }
@@ -731,7 +730,7 @@ func DetachWindowEventHandler(hwnd uint32) {
 	key := uintptr(hwnd)
 	if handler, exists := windowEventHandlers[hwnd]; exists {
 		tag := uintptr(unsafe.Pointer(handler))
-		if ret := C.HTMLayoutWindowDetachEventHandler(C.HWND(C.HANDLE(key)), (*[0]byte)(unsafe.Pointer(goElementProc)), C.LPVOID(tag)); ret != HLDOM_OK {
+		if ret := C.HTMLayoutWindowDetachEventHandler(C.HWND(C.HANDLE(key)), (C.LPELEMENT_EVENT_PROC)(unsafe.Pointer(goElementProc)), C.LPVOID(tag)); ret != HLDOM_OK {
 			domPanic(ret, "Failed to detach event handler from window")
 		}
 		delete(windowEventHandlers, hwnd)
@@ -742,7 +741,7 @@ func AttachNotifyHandler(hwnd uint32, handler *NotifyHandler) {
 	key := uintptr(hwnd)
 	// Overwrite if it exists
 	notifyHandlers[key] = handler
-	C.HTMLayoutSetCallback(C.HWND(C.HANDLE(key)), (*[0]byte)(unsafe.Pointer(goNotifyProc)), C.LPVOID(key))
+	C.HTMLayoutSetCallback(C.HWND(C.HANDLE(key)), (C.LPHTMLAYOUT_NOTIFY)(unsafe.Pointer(goNotifyProc)), C.LPVOID(key))
 }
 
 func DetachNotifyHandler(hwnd uint32) {

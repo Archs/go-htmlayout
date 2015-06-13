@@ -174,18 +174,40 @@ func stringToUtf16Ptr(s string) *uint16 {
 	return &stringToUtf16(s)[0]
 }
 
+/**Marks DOM object as used (a.k.a. AddRef).
+ * \param[in] he \b #HELEMENT
+ * \return \b #HLDOM_RESULT
+ * Application should call this function before using element handle. If the
+ * application fails to do that calls to other DOM functions for this handle
+ * may result in an error.
+ *
+ * \sa #HTMLayout_UnuseElement()
+ **/
+// EXTERN_C HLDOM_RESULT HLAPI HTMLayout_UseElement(HELEMENT he);
+//sys HTMLayout_UseElement(he HELEMENT) (ret HLDOM_RESULT) = htmlayout.HTMLayout_UseElement
 func use(handle HELEMENT) {
-	// if dr := C.HTMLayout_UseElement(handle); dr != HLDOM_OK {
-	// 	domPanic(dr, "UseElement")
-	// }
+	if dr := HTMLayout_UseElement(handle); dr != HLDOM_OK {
+		domPanic2(dr, "UseElement")
+	}
 }
 
+/**Marks DOM object as unused (a.k.a. Release).
+ * Get handle of every element's child element.
+ * \param[in] he \b #HELEMENT
+ * \return \b #HLDOM_RESULT
+ *
+ * Application should call this function when it does not need element's
+ * handle anymore.
+ * \sa #HTMLayout_UseElement()
+ **/
+// EXTERN_C HLDOM_RESULT HLAPI HTMLayout_UnuseElement(HELEMENT he);
+//sys HTMLayout_UnuseElement(he HELEMENT) (ret HLDOM_RESULT) = htmlayout.HTMLayout_UnuseElement
 func unuse(handle HELEMENT) {
-	// if handle != nil {
-	// 	if dr := C.HTMLayout_UnuseElement(handle); dr != HLDOM_OK {
-	// 		domPanic(dr, "UnuseElement")
-	// 	}
-	// }
+	if handle != 0 {
+		if dr := HTMLayout_UnuseElement(handle); dr != HLDOM_OK {
+			domPanic2(dr, "UnuseElement")
+		}
+	}
 }
 
 /*

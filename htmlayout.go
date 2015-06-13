@@ -337,9 +337,12 @@ var (
 	behaviors           = make(map[*EventHandler]int, 32)
 )
 
-type HELEMENT C.HELEMENT
-type HLDOM_RESULT C.HLDOM_RESULT
-type VALUE_RESULT C.UINT
+// typedef htmlayout_dom_element* HELEMENT;
+type HELEMENT uintptr
+
+// typedef int HLDOM_RESULT;
+type HLDOM_RESULT int  // int
+type VALUE_RESULT uint // C.UINT
 
 type Point struct {
 	X int32

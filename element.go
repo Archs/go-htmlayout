@@ -267,16 +267,28 @@ func GetRootElement(hwnd win.HWND) *Element {
 	return NewElementFromHandle(handle)
 }
 
-// func FocusedElement(hwnd uint32) *Element {
-// 	var handle HELEMENT = BAD_HELEMENT
-// 	if ret := C.HTMLayoutGetFocusElement(C.HWND(C.HANDLE(uintptr(hwnd))), (*C.HELEMENT)(&handle)); ret != HLDOM_OK {
-// 		domPanic(ret, "Failed to get focus element")
-// 	}
-// 	if handle != BAD_HELEMENT {
-// 		return NewElementFromHandle(handle)
-// 	}
-// 	return nil
-// }
+/**Get focused DOM element of HTML document.
+ * \param[in] hwnd \b HWND, HTMLayout window for which you need to get focus
+ * element
+ * \param[out ] phe \b #HELEMENT*, variable to receive focus element
+ * \return \b #HLDOM_RESULT
+ *
+ * phe can have null value (0).
+ *
+ * COMMENT: To set focus on element use HTMLayoutSetElementState(STATE_FOCUS,0)
+ **/
+// EXTERN_C  HLDOM_RESULT HLAPI HTMLayoutGetFocusElement(HWND hwnd, HELEMENT *phe);
+//sys HTMLayoutGetFocusElement(hwnd HWND, pheT *HELEMENT) (ret HLDOM_RESULT, err error) [failretval == 0] = htmlayout.HTMLayoutGetFocusElement
+func GetFocusedElement(hwnd uint32) *Element {
+	var handle HELEMENT = BAD_HELEMENT
+	if ret, err := HTMLayoutGetFocusElement(HWND(hwnd), &handle); err != nil {
+		domPanic2(ret, "Failed to get focus element")
+	}
+	if handle != BAD_HELEMENT {
+		return NewElementFromHandle(handle)
+	}
+	return nil
+}
 
 // Finalizer method, only to be called from Release or by
 // the Go runtime

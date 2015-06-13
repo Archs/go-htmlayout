@@ -230,15 +230,22 @@ func NewElementFromHandle(h HELEMENT) *Element {
 	return e
 }
 
-// func NewElement(tagName string) *Element {
-// 	var handle HELEMENT = BAD_HELEMENT
-// 	szName := C.CString(tagName)
-// 	defer C.free(unsafe.Pointer(szName))
-// 	if ret := C.HTMLayoutCreateElement((*C.CHAR)(szName), nil, (*C.HELEMENT)(&handle)); ret != HLDOM_OK {
-// 		domPanic(ret, "Failed to create new element")
-// 	}
-// 	return NewElementFromHandle(handle)
-// }
+/** Create new element, the element is disconnected initially from the DOM.
+   Element created with ref_count = 1 thus you \b must call HTMLayout_UnuseElement on returned handler.
+* \param[in] tagname \b LPCSTR, html tag of the element e.g. "div", "option", etc.
+* \param[in] textOrNull \b LPCWSTR, initial text of the element or NULL. text here is a plain text - method does no parsing.
+* \param[out ] phe \b #HELEMENT*, variable to receive handle of the element
+ **/
+// EXTERN_C HLDOM_RESULT HLAPI HTMLayoutCreateElement( LPCSTR tagname, LPCWSTR textOrNull, /*out*/ HELEMENT *phe );
+//sys HTMLayoutCreateElement(tagname string, textOrNull *uint16, phe *HELEMENT) (ret HLDOM_RESULT, err error) [failretval == 0] = htmlayout.HTMLayoutCreateElement
+
+func NewElement(tagName string) *Element {
+	var handle HELEMENT = BAD_HELEMENT
+	if ret, err := HTMLayoutCreateElement(tagName, nil, &handle); err != nil {
+		domPanic2(ret, "Failed to create new element")
+	}
+	return NewElementFromHandle(handle)
+}
 
 // func RootElement(hwnd uint32) *Element {
 // 	var handle HELEMENT = BAD_HELEMENT

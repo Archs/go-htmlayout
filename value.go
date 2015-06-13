@@ -49,7 +49,7 @@ func (v *JsonValue) IsString() bool {
 //sys ValueStringData(pval *JsonValue, pChars uintptr, pNumChars *uint) (ret uint) = htmlayout.ValueStringData
 
 func (v *JsonValue) ToString() string {
-	how := C.CVT_SIMPLE
+	how := uint(C.CVT_SIMPLE)
 	if v.IsString() {
 		szValue := (*C.WCHAR)(nil)
 		num := uint(0)

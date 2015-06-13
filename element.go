@@ -718,15 +718,28 @@ func (e *Element) Swap(other *Element) {
 	}
 }
 
-// // Sorts 'count' child elements starting at index 'start'.  Uses comparator to define the
-// // order.  Comparator should return -1, or 0, or 1 to indicate less, equal or greater
-// func (e *Element) SortChildrenRange(start, count uint, comparator func(*Element, *Element) int) {
-// 	end := start + count
-// 	arg := uintptr(unsafe.Pointer(&comparator))
-// 	if ret := C.HTMLayoutSortElements(e.handle, C.UINT(start), C.UINT(end), (*C.ELEMENT_COMPARATOR)(unsafe.Pointer(goElementComparator)), C.LPVOID(arg)); ret != HLDOM_OK {
-// 		domPanic(ret, "Failed to sort elements")
-// 	}
-// }
+/** HTMLayoutSortElements - sort children of the element.
+ * \param[in] he \b HELEMENT, element which children to be sorted.
+ * \param[in] firstIndex \b UINT, first child index to start sorting from.
+ * \param[in] lastIndex \b UINT, last index of the sorting range, element with this index will not be included in the sorting.
+ * \param[in] cmpFunc \b ELEMENT_COMPARATOR, comparator function.
+ * \param[in] cmpFuncParam \b LPVOID, parameter to be passed in comparator function.
+ **/
+
+// EXTERN_C HLDOM_RESULT HLAPI HTMLayoutSortElements(
+//          HELEMENT he, UINT firstIndex, UINT lastIndex,
+//          ELEMENT_COMPARATOR* cmpFunc, LPVOID cmpFuncParam );
+//sys HTMLayoutSortElements(he HELEMENT, firstIndex uint, lastIndex uint, cmpFunc uintptr, cmpFuncParam uintptr) (ret HLDOM_RESULT) = htmlayout.HTMLayoutSortElements
+
+// Sorts 'count' child elements starting at index 'start'.  Uses comparator to define the
+// order.  Comparator should return -1, or 0, or 1 to indicate less, equal or greater
+func (e *Element) SortChildrenRange(start, count uint, comparator func(*Element, *Element) int) {
+	end := start + count
+	arg := uintptr(unsafe.Pointer(&comparator))
+	if ret := HTMLayoutSortElements(e.handle, start, end, goElementComparator, arg); ret != HLDOM_OK {
+		domPanic2(ret, "Failed to sort elements")
+	}
+}
 
 // func (e *Element) SortChildren(comparator func(*Element, *Element) int) {
 // 	e.SortChildrenRange(0, e.ChildCount(), comparator)

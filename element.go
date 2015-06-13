@@ -779,21 +779,32 @@ func (e *Element) Hwnd() win.HWND {
 	return hwnd
 }
 
-// func (e *Element) RootHwnd() uint32 {
-// 	var hwnd uint32
-// 	if ret := C.HTMLayoutGetElementHwnd(e.handle, (*C.HWND)(unsafe.Pointer(&hwnd)), 1); ret != HLDOM_OK {
-// 		domPanic(ret, "Failed to get element's root hwnd")
-// 	}
-// 	return hwnd
-// }
+func (e *Element) RootHwnd() win.HWND {
+	var hwnd win.HWND
+	if ret := HTMLayoutGetElementHwnd(e.handle, (*HWND)(&hwnd), 1); ret != HLDOM_OK {
+		domPanic2(ret, "Failed to get element's root hwnd")
+	}
+	return hwnd
+}
 
-// func (e *Element) Html() string {
-// 	var data *C.char
-// 	if ret := C.HTMLayoutGetElementHtml(e.handle, (*C.LPBYTE)(unsafe.Pointer(&data)), C.BOOL(0)); ret != HLDOM_OK {
-// 		domPanic(ret, "Failed to get inner html")
-// 	}
-// 	return C.GoString(data)
-// }
+/**Get text of the element and information where child elements are placed.
+ * \param[in] he \b #HELEMENT
+ * \param[out] utf8bytes \b pointer to byte address receiving UTF8 encoded HTML
+ * \param[in] outer \b BOOL, if TRUE will retunr outer HTML otherwise inner.
+ * \return \b #HLDOM_RESULT
+ */
+// EXTERN_C HLDOM_RESULT HLAPI HTMLayoutGetElementHtml(HELEMENT he, LPBYTE* utf8bytes, BOOL outer);
+//sys HTMLayoutGetElementHtml(he HELEMENT, utf8bytes uintptr, outer BOOL) (ret HLDOM_RESULT) = htmlayout.HTMLayoutGetElementHtml
+func (e *Element) Html() string {
+	var data *C.char
+	p := unsafe.Pointer(&data)
+	if ret := HTMLayoutGetElementHtml(e.handle, uintptr(p), BOOL(0)); ret != HLDOM_OK {
+		domPanic2(ret, "Failed to get inner html")
+	}
+	str := C.GoString(data)
+	C.free(unsafe.Pointer(data))
+	return str
+}
 
 // func (e *Element) OuterHtml() string {
 // 	var data *C.char

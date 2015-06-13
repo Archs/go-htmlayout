@@ -633,11 +633,22 @@ func (e *Element) Parent() *Element {
 	return nil
 }
 
-// func (e *Element) InsertChild(child *Element, index uint) {
-// 	if ret := C.HTMLayoutInsertElement(child.handle, e.handle, C.UINT(index)); ret != HLDOM_OK {
-// 		domPanic(ret, "Failed to insert child element at index: ", index)
-// 	}
-// }
+/** Insert element at \i index position of parent.
+   It is not an error to insert element which already has parent - it will be disconnected first, but
+   you need to update elements parent in this case.
+* \param index \b UINT, position of the element in parent collection.
+  It is not an error to provide index greater than elements count in parent -
+  it will be appended.
+**/
+//
+// EXTERN_C HLDOM_RESULT HLAPI HTMLayoutInsertElement( HELEMENT he, HELEMENT hparent, UINT index );
+//sys HTMLayoutInsertElement(he HELEMENT,hparent HELEMENT, index uint) (ret HLDOM_RESULT) = htmlayout.HTMLayoutInsertElement
+
+func (e *Element) InsertChild(child *Element, index uint) {
+	if ret := HTMLayoutInsertElement(child.handle, e.handle, index); ret != HLDOM_OK {
+		domPanic2(ret, "Failed to insert child element at index: ", index)
+	}
+}
 
 // func (e *Element) AppendChild(child *Element) {
 // 	count := e.ChildCount()

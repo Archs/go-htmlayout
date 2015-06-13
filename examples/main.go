@@ -100,12 +100,8 @@ func ui(hwnd win.HWND) {
 
 // func DefWindowProc(hWnd HWND, Msg uint32, wParam, lParam uintptr) uintptr
 func WndProc(hWnd win.HWND, message uint32, wParam uintptr, lParam uintptr) uintptr {
-	var pbHandled gohl.BOOL
 	ret, handled := gohl.ProcNoDefault(hWnd, message, wParam, lParam)
 	if handled {
-		return uintptr(ret)
-	}
-	if pbHandled != 0 { //先把消息给HTMLayout
 		return uintptr(ret)
 	}
 	switch message {

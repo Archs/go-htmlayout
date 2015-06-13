@@ -741,19 +741,25 @@ func (e *Element) SortChildrenRange(start, count uint, comparator func(*Element,
 	}
 }
 
-// func (e *Element) SortChildren(comparator func(*Element, *Element) int) {
-// 	e.SortChildrenRange(0, e.ChildCount(), comparator)
-// }
+func (e *Element) SortChildren(comparator func(*Element, *Element) int) {
+	e.SortChildrenRange(0, e.ChildCount(), comparator)
+}
 
-// func (e *Element) SetTimer(ms int) {
-// 	if ret := C.HTMLayoutSetTimer(e.handle, C.UINT(ms)); ret != HLDOM_OK {
-// 		domPanic(ret, "Failed to set timer")
-// 	}
-// }
+/** Start Timer for the element.
+   Element will receive on_timer event
+   To stop timer call HTMLayoutSetTimer( he, 0 );
+**/
+// EXTERN_C HLDOM_RESULT HLAPI HTMLayoutSetTimer( HELEMENT he, UINT milliseconds );
+//sys HTMLayoutSetTimer(he HELEMENT, milliseconds uint) (ret HLDOM_RESULT) = htmlayout.HTMLayoutSetTimer
+func (e *Element) SetTimer(ms int) {
+	if ret := HTMLayoutSetTimer(e.handle, uint(ms)); ret != HLDOM_OK {
+		domPanic2(ret, "Failed to set timer")
+	}
+}
 
-// func (e *Element) CancelTimer() {
-// 	e.SetTimer(0)
-// }
+func (e *Element) CancelTimer() {
+	e.SetTimer(0)
+}
 
 // func (e *Element) Hwnd() uint32 {
 // 	var hwnd uint32

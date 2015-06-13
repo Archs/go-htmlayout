@@ -726,11 +726,31 @@ func LoadFile(hwnd win.HWND, filename string) error {
 	return nil
 }
 
+/**This function is used in response to HLN_LOAD_DATA request.
+ *
+ * \param[in] hwnd \b HWND, HTMLayout window handle.
+ * \param[in] uri \b LPCWSTR, URI of the data requested by HTMLayout.
+ * \param[in] data \b LPBYTE, pointer to data buffer.
+ * \param[in] dataLength \b DWORD, length of the data in bytes.
+ * \return \b BOOL, TRUE if HTMLayout accepts the data or \c FALSE if error occured
+ * (for example this function was called outside of #HLN_LOAD_DATA request).
+ *
+ * \warning If used, call of this function MUST be done ONLY while handling
+ * HLN_LOAD_DATA request and in the same thread. For asynchronous resource loading
+ * use HTMLayoutDataReadyAsync
+ **/
+//EXTERN_C BOOL HLAPI HTMLayoutDataReady(HWND hwnd,LPCWSTR uri,LPBYTE data, DWORD dataLength);
+//sys HTMLayoutDataReady(hwnd HWND,uri *uint16,data []byte, dataLength int32) (ret int, err error) [failretval == 0] = htmlayout.HTMLayoutDataReady
+
 // Call this from your NotifyHandler.HandleLoadData method if you want htmlayout to
 // process the data right away so you don't have to provide a buffer in the NmhlLoadData structure.
-// func DataReady(hwnd uint32, uri *uint16, data []byte) bool {
-// 	return C.HTMLayoutDataReady(C.HWND(C.HANDLE(uintptr(hwnd))), (*C.WCHAR)(uri), (*C.BYTE)(&data[0]), C.DWORD(len(data))) != 0
-// }
+func DataReady(hwnd win.HWND, uri string, data []byte) (bool, error) {
+	_, err := HTMLayoutDataReady(HWND(hwnd), syscall.StringToUTF16Ptr(uri), data, int32(len(data)))
+	if err != nil {
+		return false, err
+	}
+	return true, nil
+}
 
 //typedef htmlayout_dom_element* HELEMENT
 

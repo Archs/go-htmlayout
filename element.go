@@ -904,24 +904,34 @@ func (e *Element) GetInnerText() string {
 	return C.GoString(data)
 }
 
-// //
-// // HTML attribute accessors/modifiers:
-// //
+//
+// HTML attribute accessors/modifiers:
+//
 
-// // Returns the value of attr and a boolean indicating whether or not that attr exists.
-// // If the boolean is true, then the returned string is valid.
-// func (e *Element) Attr(key string) (string, bool) {
-// 	szValue := (*C.WCHAR)(nil)
-// 	szKey := C.CString(key)
-// 	defer C.free(unsafe.Pointer(szKey))
-// 	if ret := C.HTMLayoutGetAttributeByName(e.handle, (*C.CHAR)(szKey), (*C.LPCWSTR)(&szValue)); ret != HLDOM_OK {
-// 		domPanic(ret, "Failed to get attribute: ", key)
-// 	}
-// 	if szValue != nil {
-// 		return utf16ToString((*uint16)(szValue)), true
-// 	}
-// 	return "", false
-// }
+/**Get value of any element's attribute by name.
+ * \param[in] he \b #HELEMENT
+ * \param[in] name \b LPCSTR, attribute name
+ * \param[out] p_value \b LPCWSTR*, will be set to address of the string
+ * containing attribute value
+ * \return \b #HLDOM_RESULT
+ **/
+// EXTERN_C  HLDOM_RESULT HLAPI HTMLayoutGetAttributeByName(HELEMENT he, LPCSTR name, LPCWSTR* p_value);
+//sys HTMLayoutGetAttributeByName(he HELEMENT, utf8bytes *byte, p_value uintptr) (ret HLDOM_RESULT) = htmlayout.HTMLayoutGetAttributeByName
+
+// Returns the value of attr and a boolean indicating whether or not that attr exists.
+// If the boolean is true, then the returned string is valid.
+func (e *Element) Attr(key string) (string, bool) {
+	szValue := (*C.WCHAR)(nil)
+	szKey := C.CString(key)
+	defer C.free(unsafe.Pointer(szKey))
+	if ret := HTMLayoutGetAttributeByName(e.handle, (*byte)(unsafe.Pointer(szKey)), (uintptr)(unsafe.Pointer(&szValue))); ret != HLDOM_OK {
+		domPanic2(ret, "Failed to get attribute: ", key)
+	}
+	if szValue != nil {
+		return utf16ToString((*uint16)(szValue)), true
+	}
+	return "", false
+}
 
 // func (e *Element) AttrAsFloat(key string) (float64, bool, error) {
 // 	var f float64

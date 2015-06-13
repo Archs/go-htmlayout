@@ -874,13 +874,19 @@ func (e *Element) AppendHtml(suffix string) {
 	}
 }
 
-// func (e *Element) SetText(text string) {
-// 	szText := C.CString(text)
-// 	defer C.free(unsafe.Pointer(szText))
-// 	if ret := C.HTMLayoutSetElementInnerText(e.handle, (*C.BYTE)(unsafe.Pointer(szText)), C.UINT(len(text))); ret != HLDOM_OK {
-// 		domPanic(ret, "Failed to replace element's text")
-// 	}
-// }
+/**Set inner text of the element.
+ * \param[in] he \b #HELEMENT
+ * \param[in] utf8bytes \b pointer, UTF8 encoded plain text
+ * \param[in] length \b UINT, number of bytes in utf8bytes sequence
+ * \return \b #HLDOM_RESULT
+ */
+// EXTERN_C HLDOM_RESULT HLAPI HTMLayoutSetElementInnerText(HELEMENT he, LPCBYTE utf8bytes, UINT length);
+//sys HTMLayoutSetElementInnerText(he HELEMENT, text string, length uint) (ret HLDOM_RESULT, err error) [failretval != 0] = htmlayout.HTMLayoutSetElementInnerText
+func (e *Element) SetInnerText(text string) {
+	if ret, err := HTMLayoutSetElementInnerText(e.handle, text, uint(len(text))); err != nil {
+		domPanic2(ret, "Failed to replace element's text")
+	}
+}
 
 // func (e *Element) Text() string {
 // 	var data *C.char

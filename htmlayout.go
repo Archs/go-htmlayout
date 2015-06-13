@@ -9,6 +9,7 @@ import "C"
 
 import (
 	"errors"
+	"fmt"
 	"github.com/lxn/win"
 	"log"
 	"syscall"
@@ -422,6 +423,22 @@ type MethodParams struct {
 	MethodId uint32
 }
 
+// struct XCALL_PARAMS: METHOD_PARAMS
+// {
+//   LPCSTR       method_name;
+//   UINT         argc;
+//   json::value *argv;
+//   json::value  retval;
+//   XCALL_PARAMS(LPCSTR name):method_name(name), argc(0),argv(0) { methodID = XCALL; }
+// };
+type XCALL_PARAMS struct {
+	MethodParams
+	MethodName *byte
+	Argc       uint
+	Argv       *JsonValue
+	RetVal     JsonValue
+}
+
 // TODO: Add all the structures derived from MethodParams here...
 
 type DataArrivedParams struct {
@@ -575,9 +592,14 @@ var goElementProc = syscall.NewCallback(func(tag uintptr, he unsafe.Pointer, evt
 			handled = handler.OnBehaviorEvent(el, p)
 		}
 	case C.HANDLE_METHOD_CALL:
-		if handler.OnMethodCall != nil {
-			p := (*MethodParams)(params)
-			handled = handler.OnMethodCall(el, p)
+		p := (*MethodParams)(params)
+		if p.MethodId == XCALL && handler.OnScriptCall != nil {
+			xp := (*XCALL_PARAMS)(params)
+			handler.OnScriptCall(el, xp)
+		} else {
+			if handler.OnMethodCall != nil {
+				handled = handler.OnMethodCall(el, p)
+			}
 		}
 	case C.HANDLE_DATA_ARRIVED:
 		if handler.OnDataArrived != nil {
@@ -829,4 +851,29 @@ func DumpObjectCounts() {
 	log.Print("Window notify handlers (", len(notifyHandlers), "): ", notifyHandlers)
 	log.Print("Window event handlers (", len(windowEventHandlers), "): ", windowEventHandlers)
 	log.Print("Element event handlers (", len(eventHandlers), "): ", eventHandlers)
+}
+
+/** HTMLayoutSetupDebugOutput - setup debug output function.
+ *
+ *  This output function will be used for reprting problems
+ *  found while loading html and css documents.
+ *
+ **/
+
+// typedef VOID (CALLBACK* DEBUG_OUTPUT_PROC)(LPVOID param, INT character);
+
+// EXTERN_C VOID HLAPI HTMLayoutSetupDebugOutput(
+//                 LPVOID                param,    // param to be passed "as is" to the pfOutput
+//                 DEBUG_OUTPUT_PROC     pfOutput  // output function, output stream alike thing.
+//                 );
+//sys HTMLayoutSetupDebugOutput(param uintptr, pfOutput uintptr) = htmlayout.HTMLayoutSetupDebugOutput
+
+var debugToConsole = syscall.NewCallback(func(param uintptr, char int) int {
+	str := fmt.Sprintf("%c", char)
+	print(str)
+	return 0
+})
+
+func EnableDebug() {
+	HTMLayoutSetupDebugOutput(0, debugToConsole)
 }

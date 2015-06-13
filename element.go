@@ -668,21 +668,40 @@ func (e *Element) Detach() {
 	}
 }
 
-// func (e *Element) Delete() {
-// 	if ret := C.HTMLayoutDeleteElement(e.handle); ret != HLDOM_OK {
-// 		domPanic(ret, "Failed to delete element from dom")
-// 	}
-// 	e.finalize()
-// }
+/**Delete element.
+ * \param[in] he \b #HELEMENT
+ * \return \b #HLDOM_RESULT
+ *
+ * This function removes element from the DOM tree and then deletes it.
+ *
+ * \warning After call to this function \c he will become invalid.
+ **/
+// EXTERN_C HLDOM_RESULT HLAPI HTMLayoutDeleteElement(HELEMENT he);
+//sys HTMLayoutDeleteElement(he HELEMENT) (ret HLDOM_RESULT) = htmlayout.HTMLayoutDeleteElement
+func (e *Element) Delete() {
+	if ret := HTMLayoutDeleteElement(e.handle); ret != HLDOM_OK {
+		domPanic2(ret, "Failed to delete element from dom")
+	}
+	e.finalize()
+}
 
-// // Makes a deep clone of the receiver, the resulting subtree is not attached to the dom.
-// func (e *Element) Clone() *Element {
-// 	var clone C.HELEMENT
-// 	if ret := C.HTMLayoutCloneElement(e.handle, &clone); ret != HLDOM_OK {
-// 		domPanic(ret, "Failed to clone element")
-// 	}
-// 	return NewElementFromHandle(HELEMENT(clone))
-// }
+/** Create new element as copy of existing element, new element is a full (deep) copy of the element and
+   is disconnected initially from the DOM.
+   Element created with ref_count = 1 thus you \b must call HTMLayout_UnuseElement on returned handler.
+* \param[in] he \b #HELEMENT, source element.
+* \param[out ] phe \b #HELEMENT*, variable to receive handle of the new element.
+ **/
+// EXTERN_C HLDOM_RESULT HLAPI HTMLayoutCloneElement( HELEMENT he, /*out*/ HELEMENT *phe );
+//sys HTMLayoutCloneElement(he HELEMENT, phe *HELEMENT) (ret HLDOM_RESULT) = htmlayout.HTMLayoutCloneElement
+
+// Makes a deep clone of the receiver, the resulting subtree is not attached to the dom.
+func (e *Element) Clone() *Element {
+	var clone HELEMENT
+	if ret := HTMLayoutCloneElement(e.handle, &clone); ret != HLDOM_OK {
+		domPanic2(ret, "Failed to clone element")
+	}
+	return NewElementFromHandle(clone)
+}
 
 // func (e *Element) Swap(other *Element) {
 // 	if ret := C.HTMLayoutSwapElements(e.handle, other.handle); ret != HLDOM_OK {

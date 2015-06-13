@@ -105,12 +105,12 @@ func WndProc(hWnd win.HWND, message uint32, wParam uintptr, lParam uintptr) uint
 		return uintptr(ret)
 	}
 	switch message {
-	// case win.WM_CREATE:
-	// 	ui(hWnd)
+	case win.WM_CREATE:
+		println("win.WM_CREATE called", win.WM_CREATE)
 	default:
 		return win.DefWindowProc(hWnd, message, wParam, lParam)
 	}
-	return 0
+	return win.DefWindowProc(hWnd, message, wParam, lParam)
 }
 
 func MyRegisterClass(hInstance win.HINSTANCE) (atom win.ATOM) {

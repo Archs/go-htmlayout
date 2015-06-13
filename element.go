@@ -650,18 +650,23 @@ func (e *Element) InsertChild(child *Element, index uint) {
 	}
 }
 
-// func (e *Element) AppendChild(child *Element) {
-// 	count := e.ChildCount()
-// 	if ret := C.HTMLayoutInsertElement(child.handle, e.handle, C.UINT(count)); ret != HLDOM_OK {
-// 		domPanic(ret, "Failed to append child element")
-// 	}
-// }
+func (e *Element) AppendChild(child *Element) {
+	count := e.ChildCount()
+	if ret := HTMLayoutInsertElement(child.handle, e.handle, count); ret != HLDOM_OK {
+		domPanic2(ret, "Failed to append child element")
+	}
+}
 
-// func (e *Element) Detach() {
-// 	if ret := C.HTMLayoutDetachElement(e.handle); ret != HLDOM_OK {
-// 		domPanic(ret, "Failed to detach element from dom")
-// 	}
-// }
+/** Take element out of its container (and DOM tree).
+   Element will be destroyed when its reference counter will become zero
+**/
+// EXTERN_C HLDOM_RESULT HLAPI HTMLayoutDetachElement( HELEMENT he );
+//sys HTMLayoutDetachElement(he HELEMENT) (ret HLDOM_RESULT) = htmlayout.HTMLayoutDetachElement
+func (e *Element) Detach() {
+	if ret := HTMLayoutDetachElement(e.handle); ret != HLDOM_OK {
+		domPanic2(ret, "Failed to detach element from dom")
+	}
+}
 
 // func (e *Element) Delete() {
 // 	if ret := C.HTMLayoutDeleteElement(e.handle); ret != HLDOM_OK {

@@ -590,21 +590,29 @@ func (e *Element) Child(index uint) *Element {
 	return NewElementFromHandle(child)
 }
 
-// func (e *Element) Children() []*Element {
-// 	slice := make([]*Element, 0, 32)
-// 	for i := uint(0); i < e.ChildCount(); i++ {
-// 		slice = append(slice, e.Child(i))
-// 	}
-// 	return slice
-// }
+func (e *Element) Children() []*Element {
+	slice := make([]*Element, 0, 32)
+	for i := uint(0); i < e.ChildCount(); i++ {
+		slice = append(slice, e.Child(i))
+	}
+	return slice
+}
 
-// func (e *Element) Index() uint {
-// 	var index C.UINT
-// 	if ret := C.HTMLayoutGetElementIndex(e.handle, &index); ret != HLDOM_OK {
-// 		domPanic(ret, "Failed to get element's index")
-// 	}
-// 	return uint(index)
-// }
+/**Get element index.
+ * \param[in] he \b #HELEMENT
+ * \param[out] p_index \b LPUINT, variable to receive number of the element
+ * among parent element's subelements.
+ * \return \b #HLDOM_RESULT
+ **/
+// EXTERN_C  HLDOM_RESULT HLAPI HTMLayoutGetElementIndex(HELEMENT he, LPUINT p_index);
+//sys HTMLayoutGetElementIndex(he HELEMENT, p_index *uint) (ret HLDOM_RESULT) = htmlayout.HTMLayoutGetElementIndex
+func (e *Element) Index() uint {
+	var index uint
+	if ret := HTMLayoutGetElementIndex(e.handle, &index); ret != HLDOM_OK {
+		domPanic2(ret, "Failed to get element's index")
+	}
+	return index
+}
 
 // func (e *Element) Parent() *Element {
 // 	var parent C.HELEMENT

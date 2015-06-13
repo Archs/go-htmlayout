@@ -888,13 +888,21 @@ func (e *Element) SetInnerText(text string) {
 	}
 }
 
-// func (e *Element) Text() string {
-// 	var data *C.char
-// 	if ret := C.HTMLayoutGetElementInnerText(e.handle, (*C.LPBYTE)(unsafe.Pointer(&data))); ret != HLDOM_OK {
-// 		domPanic(ret, "Failed to get text")
-// 	}
-// 	return C.GoString(data)
-// }
+/**Get inner text of the element.
+ * \param[in] he \b #HELEMENT
+ * \param[out] utf8bytes \b pointer to byte address receiving UTF8 encoded plain text
+ * \return \b #HLDOM_RESULT
+ */
+// EXTERN_C HLDOM_RESULT HLAPI HTMLayoutGetElementInnerText(HELEMENT he, LPBYTE* utf8bytes);
+//sys HTMLayoutGetElementInnerText(he HELEMENT, utf8bytes uintptr) (ret HLDOM_RESULT) = htmlayout.HTMLayoutGetElementInnerText
+
+func (e *Element) GetInnerText() string {
+	var data *C.char
+	if ret := HTMLayoutGetElementInnerText(e.handle, (uintptr)(unsafe.Pointer(&data))); ret != HLDOM_OK {
+		domPanic2(ret, "Failed to get text")
+	}
+	return C.GoString(data)
+}
 
 // //
 // // HTML attribute accessors/modifiers:

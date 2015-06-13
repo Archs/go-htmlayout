@@ -614,16 +614,24 @@ func (e *Element) Index() uint {
 	return index
 }
 
-// func (e *Element) Parent() *Element {
-// 	var parent C.HELEMENT
-// 	if ret := C.HTMLayoutGetParentElement(e.handle, &parent); ret != HLDOM_OK {
-// 		domPanic(ret, "Failed to get parent")
-// 	}
-// 	if parent != nil {
-// 		return NewElementFromHandle(HELEMENT(parent))
-// 	}
-// 	return nil
-// }
+/**Get parent element.
+ * \param[in] he \b #HELEMENT, element which parent you need
+ * \param[out] p_parent_he \b #HELEMENT*, variable to recieve handle of the
+ * parent element
+ * \return \b #HLDOM_RESULT
+ **/
+// EXTERN_C  HLDOM_RESULT HLAPI HTMLayoutGetParentElement(HELEMENT he, HELEMENT* p_parent_he);
+//sys HTMLayoutGetParentElement(he HELEMENT, p_parent_he *HELEMENT) (ret HLDOM_RESULT) = htmlayout.HTMLayoutGetParentElement
+func (e *Element) Parent() *Element {
+	var parent HELEMENT
+	if ret := HTMLayoutGetParentElement(e.handle, &parent); ret != HLDOM_OK {
+		domPanic2(ret, "Failed to get parent")
+	}
+	if parent != 0 {
+		return NewElementFromHandle(parent)
+	}
+	return nil
+}
 
 // func (e *Element) InsertChild(child *Element, index uint) {
 // 	if ret := C.HTMLayoutInsertElement(child.handle, e.handle, C.UINT(index)); ret != HLDOM_OK {

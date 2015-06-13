@@ -63,6 +63,8 @@ var (
 	procHTMLayoutGetElementLocation = modhtmlayout.NewProc("HTMLayoutGetElementLocation")
 	procHTMLayoutCallBehaviorMethod = modhtmlayout.NewProc("HTMLayoutCallBehaviorMethod")
 	procValueBinaryData = modhtmlayout.NewProc("ValueBinaryData")
+	procValueToString = modhtmlayout.NewProc("ValueToString")
+	procValueStringData = modhtmlayout.NewProc("ValueStringData")
 )
 
 func HTMLayoutProcND(hwnd HWND, msg uint32, wParam uintptr, lParam uintptr, pbHandled *BOOL) (ret LRESULT) {
@@ -467,6 +469,18 @@ func HTMLayoutCallBehaviorMethod(he HELEMENT, params *METHOD_PARAMS) (ret HLDOM_
 
 func ValueBinaryData(pval *JsonValue, pBytes *uintptr, pnBytes *uint) (ret uint) {
 	r0, _, _ := syscall.Syscall(procValueBinaryData.Addr(), 3, uintptr(unsafe.Pointer(pval)), uintptr(unsafe.Pointer(pBytes)), uintptr(unsafe.Pointer(pnBytes)))
+	ret = uint(r0)
+	return
+}
+
+func ValueToString(pval *JsonValue, how uint) (ret uint) {
+	r0, _, _ := syscall.Syscall(procValueToString.Addr(), 2, uintptr(unsafe.Pointer(pval)), uintptr(how), 0)
+	ret = uint(r0)
+	return
+}
+
+func ValueStringData(pval *JsonValue, pChars uintptr, pNumChars *uint) (ret uint) {
+	r0, _, _ := syscall.Syscall(procValueStringData.Addr(), 3, uintptr(unsafe.Pointer(pval)), uintptr(pChars), uintptr(unsafe.Pointer(pNumChars)))
 	ret = uint(r0)
 	return
 }

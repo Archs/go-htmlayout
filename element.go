@@ -802,25 +802,39 @@ func (e *Element) Html() string {
 		domPanic2(ret, "Failed to get inner html")
 	}
 	str := C.GoString(data)
-	C.free(unsafe.Pointer(data))
+	// TODO need free??
+	// C.free(unsafe.Pointer(data))
 	return str
 }
 
-// func (e *Element) OuterHtml() string {
-// 	var data *C.char
-// 	if ret := C.HTMLayoutGetElementHtml(e.handle, (*C.LPBYTE)(unsafe.Pointer(&data)), C.BOOL(1)); ret != HLDOM_OK {
-// 		domPanic(ret, "Failed to get outer html")
-// 	}
-// 	return C.GoString(data)
-// }
+func (e *Element) OuterHtml() string {
+	var data *C.char
+	p := unsafe.Pointer(&data)
+	if ret := HTMLayoutGetElementHtml(e.handle, uintptr(p), BOOL(1)); ret != HLDOM_OK {
+		domPanic2(ret, "Failed to get inner html")
+	}
+	str := C.GoString(data)
+	// C.free(unsafe.Pointer(data))
+	return str
+}
 
-// func (e *Element) Type() string {
-// 	var data *C.char
-// 	if ret := C.HTMLayoutGetElementType(e.handle, (*C.LPCSTR)(unsafe.Pointer(&data))); ret != HLDOM_OK {
-// 		domPanic(ret, "Failed to get element type")
-// 	}
-// 	return C.GoString(data)
-// }
+/**Get element's type.
+ * \param[in] he \b #HELEMENT
+ * \param[out] p_type \b LPCSTR*, receives name of the element type.
+ * \return \b #HLDOM_RESULT
+ *
+ * \par Example:
+ * For &lt;div&gt; tag p_type will be set to "div".
+ **/
+// EXTERN_C  HLDOM_RESULT HLAPI HTMLayoutGetElementType(HELEMENT he, LPCSTR* p_type);
+//sys HTMLayoutGetElementType(he HELEMENT, p_type uintptr) (ret HLDOM_RESULT) = htmlayout.HTMLayoutGetElementType
+func (e *Element) Type() string {
+	var data *C.char
+	if ret := HTMLayoutGetElementType(e.handle, (uintptr)(unsafe.Pointer(&data))); ret != HLDOM_OK {
+		domPanic2(ret, "Failed to get element type")
+	}
+	return C.GoString(data)
+}
 
 // func (e *Element) SetHtml(html string) {
 // 	szHtml := C.CString(html)

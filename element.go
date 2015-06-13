@@ -174,10 +174,22 @@ func stringToUtf16Ptr(s string) *uint16 {
 	return &stringToUtf16(s)[0]
 }
 
+/**Marks DOM object as unused (a.k.a. Release).
+ * Get handle of every element's child element.
+ * \param[in] he \b #HELEMENT
+ * \return \b #HLDOM_RESULT
+ *
+ * Application should call this function when it does not need element's
+ * handle anymore.
+ * \sa #HTMLayout_UseElement()
+ **/
+// EXTERN_C HLDOM_RESULT HLAPI HTMLayout_UnuseElement(HELEMENT he);
+//sys HTMLayout_UnuseElement(he HELEMENT) (ret HLDOM_RESULT) = htmlayout.HTMLayout_UnuseElement
+
 func use(handle HELEMENT) {
-	// if dr := C.HTMLayout_UseElement(handle); dr != HLDOM_OK {
-	// 	domPanic(dr, "UseElement")
-	// }
+	if dr := HTMLayout_UseElement(handle); dr != HLDOM_OK {
+		domPanic(dr, "UseElement")
+	}
 }
 
 func unuse(handle HELEMENT) {

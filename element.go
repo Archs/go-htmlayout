@@ -302,19 +302,18 @@ func (e *Element) finalize() {
 		}
 		delete(eventHandlers, e.handle)
 	}
+
+	// Release the underlying htmlayout handle
+	unuse(e.handle)
+	e.handle = BAD_HELEMENT
 }
 
-// 	// Release the underlying htmlayout handle
-// 	unuse(e.handle)
-// 	e.handle = BAD_HELEMENT
-// }
-
-// func (e *Element) Release() {
-// 	// Unregister the finalizer so that it does not get called by Go
-// 	// and then explicitly finalize this element
-// 	runtime.SetFinalizer(e, nil)
-// 	e.finalize()
-// }
+func (e *Element) Release() {
+	// Unregister the finalizer so that it does not get called by Go
+	// and then explicitly finalize this element
+	runtime.SetFinalizer(e, nil)
+	e.finalize()
+}
 
 func (e *Element) setHandle(h HELEMENT) {
 	use(h)
@@ -322,13 +321,13 @@ func (e *Element) setHandle(h HELEMENT) {
 	e.handle = h
 }
 
-// func (e *Element) Handle() HELEMENT {
-// 	return e.handle
-// }
+func (e *Element) Handle() HELEMENT {
+	return e.handle
+}
 
-// func (e *Element) Equals(other *Element) bool {
-// 	return other != nil && e.handle == other.handle
-// }
+func (e *Element) Equals(other *Element) bool {
+	return other != nil && e.handle == other.handle
+}
 
 // This is the same as AttachHandler, except that behaviors are singleton instances stored
 // in a master map.  They may be shared among many elements since they have no state.
@@ -348,78 +347,89 @@ func (e *Element) attachBehavior(handler *EventHandler) {
 	}
 }
 
-// func (e *Element) AttachHandler(handler *EventHandler) {
-// 	attachedHandlers, hasAttachments := eventHandlers[e.handle]
-// 	if hasAttachments {
-// 		if _, exists := attachedHandlers[handler]; exists {
-// 			// This exact event handler is already attached to this exact element.
-// 			return
-// 		}
-// 	}
+func (e *Element) AttachHandler(handler *EventHandler) {
+	attachedHandlers, hasAttachments := eventHandlers[e.handle]
+	if hasAttachments {
+		if _, exists := attachedHandlers[handler]; exists {
+			// This exact event handler is already attached to this exact element.
+			return
+		}
+	}
 
-// 	// Don't let the caller disable ATTACH/DETACH events, otherwise we
-// 	// won't know when to throw out our event handler object
-// 	subscription := handler.Subscription()
-// 	subscription &= ^uint32(DISABLE_INITIALIZATION & 0xffffffff)
+	// Don't let the caller disable ATTACH/DETACH events, otherwise we
+	// won't know when to throw out our event handler object
+	subscription := handler.Subscription()
+	subscription &= ^uint(DISABLE_INITIALIZATION & 0xffffffff)
 
-// 	tag := uintptr(unsafe.Pointer(handler))
-// 	eh := uintptr(unsafe.Pointer(e.handle))
-// 	if subscription == HANDLE_ALL {
-// 		if ret := HTMLayoutAttachEventHandler(eh, goElementProc, tag); ret != HLDOM_OK {
-// 			domPanic2(ret, "Failed to attach event handler to element")
-// 		}
-// 	} else {
-// 		if ret := HTMLayoutAttachEventHandlerEx(eh, goElementProc, tag, subscription); ret != HLDOM_OK {
-// 			domPanic(ret, "Failed to attach event handler to element")
-// 		}
-// 	}
+	tag := uintptr(unsafe.Pointer(handler))
+	eh := uintptr(unsafe.Pointer(e.handle))
+	if subscription == HANDLE_ALL {
+		if ret := HTMLayoutAttachEventHandler(eh, goElementProc, tag); ret != HLDOM_OK {
+			domPanic2(ret, "Failed to attach event handler to element")
+		}
+	} else {
+		if ret := HTMLayoutAttachEventHandlerEx(eh, goElementProc, tag, subscription); ret != HLDOM_OK {
+			domPanic2(ret, "Failed to attach event handler to element")
+		}
+	}
 
-// 	if !hasAttachments {
-// 		eventHandlers[e.handle] = make(map[*EventHandler]bool, 8)
-// 	}
-// 	eventHandlers[e.handle][handler] = true
-// }
+	if !hasAttachments {
+		eventHandlers[e.handle] = make(map[*EventHandler]bool, 8)
+	}
+	eventHandlers[e.handle][handler] = true
+}
 
-// func (e *Element) DetachHandler(handler *EventHandler) {
-// 	tag := uintptr(unsafe.Pointer(handler))
-// 	if attachedHandlers, exists := eventHandlers[e.handle]; exists {
-// 		if _, exists := attachedHandlers[handler]; exists {
-// 			if ret := C.HTMLayoutDetachEventHandler(e.handle, (C.LPELEMENT_EVENT_PROC)(unsafe.Pointer(goElementProc)), C.LPVOID(tag)); ret != HLDOM_OK {
-// 				domPanic(ret, "Failed to detach event handler from element")
-// 			}
-// 			delete(attachedHandlers, handler)
-// 			if len(attachedHandlers) == 0 {
-// 				delete(eventHandlers, e.handle)
-// 			}
-// 			return
-// 		}
-// 	}
-// 	panic("cannot detach, handler was not registered")
-// }
+func (e *Element) DetachHandler(handler *EventHandler) {
+	tag := uintptr(unsafe.Pointer(handler))
+	if attachedHandlers, exists := eventHandlers[e.handle]; exists {
+		if _, exists := attachedHandlers[handler]; exists {
+			if ret := HTMLayoutDetachEventHandler(uintptr(e.handle), goElementProc, tag); ret != HLDOM_OK {
+				domPanic2(ret, "Failed to detach event handler from element")
+			}
+			delete(attachedHandlers, handler)
+			if len(attachedHandlers) == 0 {
+				delete(eventHandlers, e.handle)
+			}
+			return
+		}
+	}
+	panic("cannot detach, handler was not registered")
+}
 
-// func (e *Element) Update(restyle, restyleDeep, remeasure, remeasureDeep, render bool) {
-// 	var flags uint32
-// 	if restyle {
-// 		if restyleDeep {
-// 			flags |= RESET_STYLE_DEEP
-// 		} else {
-// 			flags |= RESET_STYLE_THIS
-// 		}
-// 	}
-// 	if remeasure {
-// 		if remeasureDeep {
-// 			flags |= MEASURE_DEEP
-// 		} else {
-// 			flags |= MEASURE_INPLACE
-// 		}
-// 	}
-// 	if render {
-// 		flags |= REDRAW_NOW
-// 	}
-// 	if ret := C.HTMLayoutUpdateElementEx(e.handle, C.UINT(flags)); ret != HLDOM_OK {
-// 		domPanic(ret, "Failed to update element")
-// 	}
-// }
+/**Apply changes and refresh element area in its window.
+ * \param[in] he \b #HELEMENT
+ * \param[in] flags \b UINT, combination of UPDATE_ELEMENT_FLAGS.
+ * \return \b #HLDOM_RESULT
+ *
+ *  Note HTMLayoutUpdateElement is an equivalent of HTMLayoutUpdateElementEx(,RESET_STYLE_DEEP | REMEASURE [| REDRAW_NOW ])
+ *
+ **/
+// EXTERN_C  HLDOM_RESULT HLAPI HTMLayoutUpdateElementEx(HELEMENT he, UINT flags);
+//sys HTMLayoutUpdateElementEx(he uintptr, flags uint) (ret HLDOM_RESULT) = htmlayout.HTMLayoutUpdateElementEx
+
+func (e *Element) Update(restyle, restyleDeep, remeasure, remeasureDeep, render bool) {
+	var flags uint
+	if restyle {
+		if restyleDeep {
+			flags |= RESET_STYLE_DEEP
+		} else {
+			flags |= RESET_STYLE_THIS
+		}
+	}
+	if remeasure {
+		if remeasureDeep {
+			flags |= MEASURE_DEEP
+		} else {
+			flags |= MEASURE_INPLACE
+		}
+	}
+	if render {
+		flags |= REDRAW_NOW
+	}
+	if ret := HTMLayoutUpdateElementEx(uintptr(e.handle), flags); ret != HLDOM_OK {
+		domPanic2(ret, "Failed to update element")
+	}
+}
 
 // func (e *Element) Capture() {
 // 	if ret := C.HTMLayoutSetCapture(e.handle); ret != HLDOM_OK {

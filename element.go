@@ -431,11 +431,20 @@ func (e *Element) Update(restyle, restyleDeep, remeasure, remeasureDeep, render 
 	}
 }
 
-// func (e *Element) Capture() {
-// 	if ret := C.HTMLayoutSetCapture(e.handle); ret != HLDOM_OK {
-// 		domPanic(ret, "Failed to set capture for element")
-// 	}
-// }
+/**Set the mouse capture to the specified element.
+ * \param[in] he \b #HELEMENT
+ * \return \b #HLDOM_RESULT
+ *
+ * After call to this function all mouse events will be targeted to the element.
+ * To remove mouse capture call ::ReleaseCapture() function. It is declared somewhere in <windows.h>.
+ **/
+// EXTERN_C  HLDOM_RESULT HLAPI HTMLayoutSetCapture(HELEMENT he);
+//sys HTMLayoutSetCapture(he HELEMENT) (ret HLDOM_RESULT) = htmlayout.HTMLayoutSetCapture
+func (e *Element) Capture() {
+	if ret := HTMLayoutSetCapture(e.handle); ret != HLDOM_OK {
+		domPanic2(ret, "Failed to set capture for element")
+	}
+}
 
 // func (e *Element) ReleaseCapture() {
 // 	if ok := C.ReleaseCapture(); ok == 0 {
@@ -443,17 +452,22 @@ func (e *Element) Update(restyle, restyleDeep, remeasure, remeasureDeep, render 
 // 	}
 // }
 
-// // Functions for querying elements
+// Functions for querying elements
 
-// func (e *Element) Select(selector string) []*Element {
-// 	szSelector := C.CString(selector)
-// 	defer C.free(unsafe.Pointer(szSelector))
-// 	results := make([]*Element, 0, 32)
-// 	if ret := C.HTMLayoutSelectElements(e.handle, (*C.CHAR)(szSelector), (*C.HTMLayoutElementCallback)(unsafe.Pointer(goSelectCallback)), C.LPVOID(unsafe.Pointer(&results))); ret != HLDOM_OK {
-// 		domPanic(ret, "Failed to select dom elements, selector: '", selector, "'")
-// 	}
-// 	return results
-// }
+// EXTERN_C  HLDOM_RESULT HLAPI HTMLayoutSelectElementsW(
+//           HELEMENT  he,
+//           LPCWSTR   CSS_selectors,
+//           HTMLayoutElementCallback*
+//                     callback,
+//           LPVOID    param);
+//sys HTMLayoutSelectElementsW(he HELEMENT, CSS_selectors string, callback uintptr, param uintptr) (ret HLDOM_RESULT, err error) [failretval != 0] = htmlayout.HTMLayoutSelectElementsW
+func (e *Element) Select(selector string) []*Element {
+	results := make([]*Element, 0, 32)
+	if ret, err := HTMLayoutSelectElementsW(e.handle, selector, goSelectCallback, uintptr(unsafe.Pointer(&results))); err != nil {
+		domPanic2(ret, "Failed to select dom elements, selector: '", selector, "'")
+	}
+	return results
+}
 
 // // Searches up the parent chain to find the first element that matches the given selector.
 // // Includes the element in the search.  Depth indicates how far the search should progress.

@@ -542,17 +542,30 @@ func (e *Element) PostEvent(eventCode uint, source *Element, reason uint) {
 	}
 }
 
-// //
-// // DOM structure accessors/modifiers:
-// //
+//
+// DOM structure accessors/modifiers:
+//
 
-// func (e *Element) ChildCount() uint {
-// 	var count C.UINT
-// 	if ret := C.HTMLayoutGetChildrenCount(e.handle, &count); ret != HLDOM_OK {
-// 		domPanic(ret, "Failed to get child count")
-// 	}
-// 	return uint(count)
-// }
+/**Get number of child elements.
+ * \param[in] he \b #HELEMENT, element which child elements you need to count
+ * \param[out] count \b UINT*, variable to receive number of child elements
+ * \return \b #HLDOM_RESULT
+ *
+ * \par Example:
+ * for paragraph defined as
+ * \verbatim <p>Hello <b>wonderfull</b> world!</p> \endverbatim
+ * count will be set to 1 as the paragraph has only one sub element:
+ * \verbatim <b>wonderfull</b> \endverbatim
+ **/
+// EXTERN_C  HLDOM_RESULT HLAPI HTMLayoutGetChildrenCount(HELEMENT he, UINT* count);
+//sys HTMLayoutGetChildrenCount(he HELEMENT, count *uint) (ret HLDOM_RESULT) = htmlayout.HTMLayoutGetChildrenCount
+func (e *Element) ChildCount() uint {
+	var count uint
+	if ret := HTMLayoutGetChildrenCount(e.handle, &count); ret != HLDOM_OK {
+		domPanic2(ret, "Failed to get child count")
+	}
+	return count
+}
 
 // func (e *Element) Child(index uint) *Element {
 // 	var child C.HELEMENT

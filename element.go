@@ -12,7 +12,7 @@ import (
 	// "reflect"
 	"regexp"
 	"runtime"
-	// "strconv"
+	"strconv"
 	// "strings"
 	"unicode/utf16"
 	"unsafe"
@@ -933,27 +933,36 @@ func (e *Element) Attr(key string) (string, bool) {
 	return "", false
 }
 
-// func (e *Element) AttrAsFloat(key string) (float64, bool, error) {
-// 	var f float64
-// 	var err error
-// 	if s, exists := e.Attr(key); !exists {
-// 		return 0.0, false, nil
-// 	} else if f, err = strconv.ParseFloat(s, 64); err != nil {
-// 		return 0.0, true, err
-// 	}
-// 	return float64(f), true, nil
-// }
+func (e *Element) AttrAsFloat(key string) (float64, bool, error) {
+	var f float64
+	var err error
+	if s, exists := e.Attr(key); !exists {
+		return 0.0, false, nil
+	} else if f, err = strconv.ParseFloat(s, 64); err != nil {
+		return 0.0, true, err
+	}
+	return float64(f), true, nil
+}
 
-// func (e *Element) AttrAsInt(key string) (int, bool, error) {
-// 	var i int
-// 	var err error
-// 	if s, exists := e.Attr(key); !exists {
-// 		return 0, false, nil
-// 	} else if i, err = strconv.Atoi(s); err != nil {
-// 		return 0, true, err
-// 	}
-// 	return i, true, nil
-// }
+func (e *Element) AttrAsInt(key string) (int, bool, error) {
+	var i int
+	var err error
+	if s, exists := e.Attr(key); !exists {
+		return 0, false, nil
+	} else if i, err = strconv.Atoi(s); err != nil {
+		return 0, true, err
+	}
+	return i, true, nil
+}
+
+/**Set attribute's value.
+ * \param[in] he \b #HELEMENT
+ * \param[in] name \b LPCSTR, attribute name
+ * \param[in] value \b LPCWSTR, new attribute value or 0 if you want to remove attribute.
+ * \return \b #HLDOM_RESULT
+ **/
+// EXTERN_C  HLDOM_RESULT HLAPI HTMLayoutSetAttributeByName(HELEMENT he, LPCSTR name, LPCWSTR value);
+//sys HTMLayoutGetAttributeByName(he HELEMENT, utf8bytes *byte, p_value uintptr) (ret HLDOM_RESULT) = htmlayout.HTMLayoutGetAttributeByName
 
 // func (e *Element) SetAttr(key string, value interface{}) {
 // 	szKey := C.CString(key)

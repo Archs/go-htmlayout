@@ -5,6 +5,7 @@ package gohl
 import "C"
 
 import (
+	"github.com/lxn/win"
 	// "errors"
 	"fmt"
 	// "reflect"
@@ -247,13 +248,24 @@ func NewElement(tagName string) *Element {
 	return NewElementFromHandle(handle)
 }
 
-// func RootElement(hwnd uint32) *Element {
-// 	var handle HELEMENT = BAD_HELEMENT
-// 	if ret := C.HTMLayoutGetRootElement(C.HWND(C.HANDLE(uintptr(hwnd))), (*C.HELEMENT)(&handle)); ret != HLDOM_OK {
-// 		domPanic(ret, "Failed to get root element")
-// 	}
-// 	return NewElementFromHandle(handle)
-// }
+/**Get root DOM element of HTML document.
+ * \param[in] hwnd \b HWND, HTMLayout window for which you need to get root
+ * element
+ * \param[out ] phe \b #HELEMENT*, variable to receive root element
+ * \return \b #HLDOM_RESULT
+ *
+ * Root DOM object is always a 'HTML' element of the document.
+ **/
+// EXTERN_C  HLDOM_RESULT HLAPI HTMLayoutGetRootElement(HWND hwnd, HELEMENT *phe);
+//sys HTMLayoutGetRootElement(hwnd HWND, pheT *HELEMENT) (ret HLDOM_RESULT, err error) [failretval == 0] = htmlayout.HTMLayoutGetRootElement
+
+func GetRootElement(hwnd win.HWND) *Element {
+	var handle HELEMENT = BAD_HELEMENT
+	if ret, err := HTMLayoutGetRootElement(HWND(hwnd), &handle); err != nil {
+		domPanic2(ret, "Failed to get root element")
+	}
+	return NewElementFromHandle(handle)
+}
 
 // func FocusedElement(hwnd uint32) *Element {
 // 	var handle HELEMENT = BAD_HELEMENT

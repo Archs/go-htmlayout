@@ -6,3 +6,5 @@ htmlayout.dll
 *.pyc
 *.o
 _cgo_export.h
+zsyscall_*
+*.exe

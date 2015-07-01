@@ -2,8 +2,6 @@ package gohl
 
 /*
 #cgo CFLAGS: -I./htmlayout/include
-#cgo LDFLAGS: ./htmlayout/lib/HTMLayout.lib
-
 #include <stdlib.h>
 #include <htmlayout.h>
 */
@@ -670,46 +668,99 @@ var goElementComparator = syscall.NewCallback(func(he1 unsafe.Pointer, he2 unsaf
 	return cmp(NewElementFromHandle(HELEMENT(he1)), NewElementFromHandle(HELEMENT(he2)))
 })
 
+type LRESULT C.LRESULT
+type HWND uintptr
+type UINT C.UINT
+type HANDLE syscall.Handle
+type BOOL C.BOOL
+
+// EXTERN_C LRESULT HLAPI HTMLayoutProcND(HWND hwnd, UINT msg, WPARAM wParam, LPARAM lParam, BOOL* pbHandled);
+//sys HTMLayoutProcND(hwnd HWND, msg UINT, wParam uintptr, lParam uintptr, pbHandled *BOOL) (ret LRESULT) = htmlayout.HTMLayoutProcND
+
 // Main htmlayout wndproc
-func ProcNoDefault(hwnd, msg uint32, wparam, lparam uintptr) (uintptr, bool) {
-	var handled C.BOOL = 0
-	var result C.LRESULT = C.HTMLayoutProcND(C.HWND(C.HANDLE(uintptr(hwnd))), C.UINT(msg),
-		C.WPARAM(wparam), C.LPARAM(lparam), &handled)
-	return uintptr(result), handled != 0
+func ProcNoDefault(hwnd, msg uint32, wparam, lparam uintptr) (ret LRESULT, handled bool) {
+	var pbhandled BOOL = 0
+	// var result C.LRESULT = C.HTMLayoutProcND(C.HWND(C.HANDLE(uintptr(hwnd))), C.UINT(msg),
+	// 	C.WPARAM(wparam), C.LPARAM(lparam), &handled)
+	ret = HTMLayoutProcND(HWND(uintptr(hwnd)), UINT(msg),
+		wparam, lparam, &pbhandled)
+	return ret, pbhandled != 0
 }
+
+/**Load HTML from in memory buffer with base.
+ *
+ * \param[in] hWndHTMLayout \b HWND, HTMLayout window handle.
+ * \param[in] html \b LPCBYTE, Address of HTML to load.
+ * \param[in] htmlSize \b UINT, Length of the array pointed by html parameter.
+ * \param[in] baseUrl \b LPCWSTR, base URL. All relative links will be resolved against
+ *                                this URL.
+ * \return \b BOOL, \c TRUE if the text was parsed and loaded successfully, FALSE otherwise.
+ **/
+// EXTERN_C BOOL HLAPI HTMLayoutLoadHtmlEx(HWND hWndHTMLayout, LPCBYTE html, UINT htmlSize, LPCWSTR baseUrl);
+//sys HTMLayoutLoadHtmlEx(hWndHTMLayout HWND, html []byte, htmlSize UINT, baseUrl *uint16) (ret BOOL) = htmlayout.HTMLayoutLoadHtmlEx
 
 // Load html contents into window
 func LoadHtml(hwnd uint32, data []byte, baseUrl string) error {
 	if len(data) > 0 {
-		if ok := C.HTMLayoutLoadHtmlEx(C.HWND(C.HANDLE(uintptr(hwnd))), (*C.BYTE)(&data[0]),
-			C.UINT(len(data)), (*C.WCHAR)(stringToUtf16Ptr(baseUrl))); ok == 0 {
+		if ok := HTMLayoutLoadHtmlEx(HWND(hwnd), data,
+			UINT(len(data)), syscall.StringToUTF16Ptr(baseUrl)); ok == 0 {
 			return errors.New("HTMLayoutLoadHtmlEx failed")
 		}
 	}
 	return nil
 }
 
-// Load resource (file or url) into window
-func LoadResource(hwnd uint32, uri string) error {
-	if ok := C.HTMLayoutLoadFile(C.HWND(C.HANDLE(uintptr(hwnd))), (*C.WCHAR)(stringToUtf16Ptr(uri))); ok == 0 {
-		return errors.New("HTMLayoutLoadFile failed")
+/**Load HTML file.
+ *
+ * \param[in] hWndHTMLayout \b HWND, HTMLayout window handle.
+ * \param[in] filename \b LPCWSTR, File name of an HTML file.
+ * \return \b BOOL, \c TRUE if the text was parsed and loaded successfully, \c FALSE otherwise.
+ **/
+// EXTERN_C BOOL HLAPI     HTMLayoutLoadFile(HWND hWndHTMLayout, LPCWSTR filename);
+//sys HTMLayoutLoadFile(hWndHTMLayout HWND, filename *uint16) (ret int, err error) [failretval == 0] = htmlayout.HTMLayoutLoadFile
+func LoadFile(hwnd uint32, filename string) error {
+	_, err := HTMLayoutLoadFile(HWND(hwnd), syscall.StringToUTF16Ptr(filename))
+	if err != nil {
+		return err
 	}
 	return nil
 }
 
+// Load resource (file or url) into window
+// func LoadResource(hwnd uint32, uri string) error {
+// 	if ok := C.HTMLayoutLoadFile(C.HWND(C.HANDLE(uintptr(hwnd))), (*C.WCHAR)(stringToUtf16Ptr(uri))); ok == 0 {
+// 		return errors.New("HTMLayoutLoadFile failed")
+// 	}
+// 	return nil
+// }
+
 // Call this from your NotifyHandler.HandleLoadData method if you want htmlayout to
 // process the data right away so you don't have to provide a buffer in the NmhlLoadData structure.
-func DataReady(hwnd uint32, uri *uint16, data []byte) bool {
-	return C.HTMLayoutDataReady(C.HWND(C.HANDLE(uintptr(hwnd))), (*C.WCHAR)(uri), (*C.BYTE)(&data[0]), C.DWORD(len(data))) != 0
-}
+// func DataReady(hwnd uint32, uri *uint16, data []byte) bool {
+// 	return C.HTMLayoutDataReady(C.HWND(C.HANDLE(uintptr(hwnd))), (*C.WCHAR)(uri), (*C.BYTE)(&data[0]), C.DWORD(len(data))) != 0
+// }
+
+//typedef htmlayout_dom_element* HELEMENT
+
+// HLDOM_RESULT HLAPI HTMLayoutAttachEventHandler( HELEMENT he, LPELEMENT_EVENT_PROC pep, LPVOID tag );
+//sys HTMLayoutAttachEventHandler(he uintptr, pep uintptr, tag uintptr) (ret HLDOM_RESULT) = htmlayout.HTMLayoutAttachEventHandler
+
+// EXTERN_C HLDOM_RESULT HLAPI HTMLayoutAttachEventHandlerEx( HELEMENT he, LPELEMENT_EVENT_PROC pep, LPVOID tag, UINT subscription );
+//sys HTMLayoutAttachEventHandlerEx(he uintptr, pep uintptr, tag uintptr, subscription uint) (ret HLDOM_RESULT) = htmlayout.HTMLayoutAttachEventHandlerEx
+
+// EXTERN_C HLDOM_RESULT HLAPI HTMLayoutWindowAttachEventHandler( HWND hwndLayout, LPELEMENT_EVENT_PROC pep, LPVOID tag, UINT subscription );
+//sys HTMLayoutWindowAttachEventHandler(hwndLayout uintptr, pep uintptr, tag uintptr, subscription uint) (ret HLDOM_RESULT) = htmlayout.HTMLayoutWindowAttachEventHandler
+
+// EXTERN_C HLDOM_RESULT HLAPI HTMLayoutWindowDetachEventHandler( HWND hwndLayout, LPELEMENT_EVENT_PROC pep, LPVOID tag );
+//sys HTMLayoutWindowDetachEventHandler(hwndLayout uintptr, pep uintptr, tag uintptr) (ret HLDOM_RESULT) = htmlayout.HTMLayoutWindowDetachEventHandler
 
 func AttachWindowEventHandler(hwnd uint32, handler *EventHandler) {
 	key := uintptr(hwnd)
 	tag := uintptr(unsafe.Pointer(handler))
 
 	if _, exists := windowEventHandlers[hwnd]; exists {
-		if ret := C.HTMLayoutWindowDetachEventHandler(C.HWND(C.HANDLE(key)), (C.LPELEMENT_EVENT_PROC)(unsafe.Pointer(goElementProc)), C.LPVOID(tag)); ret != HLDOM_OK {
-			domPanic(ret, "Failed to detach event handler from window before adding the new one")
+		if ret := HTMLayoutWindowDetachEventHandler(key, goElementProc, tag); ret != HLDOM_OK {
+			domPanic(C.HLDOM_RESULT(ret), "Failed to detach event handler from window before adding the new one")
 		}
 	}
 
@@ -719,10 +770,10 @@ func AttachWindowEventHandler(hwnd uint32, handler *EventHandler) {
 	// Don't let the caller disable ATTACH/DETACH events, otherwise we
 	// won't know when to throw out our event handler object
 	subscription := handler.Subscription()
-	subscription &= ^uint32(DISABLE_INITIALIZATION & 0xffffffff)
+	subscription &= ^uint(DISABLE_INITIALIZATION & 0xffffffff)
 
-	if ret := C.HTMLayoutWindowAttachEventHandler(C.HWND(C.HANDLE(key)), (C.LPELEMENT_EVENT_PROC)(unsafe.Pointer(goElementProc)), C.LPVOID(tag), C.UINT(subscription)); ret != HLDOM_OK {
-		domPanic(ret, "Failed to attach event handler to window")
+	if ret := HTMLayoutWindowAttachEventHandler(key, goElementProc, tag, subscription); ret != HLDOM_OK {
+		domPanic2(ret, "Failed to attach event handler to window")
 	}
 }
 
@@ -730,24 +781,27 @@ func DetachWindowEventHandler(hwnd uint32) {
 	key := uintptr(hwnd)
 	if handler, exists := windowEventHandlers[hwnd]; exists {
 		tag := uintptr(unsafe.Pointer(handler))
-		if ret := C.HTMLayoutWindowDetachEventHandler(C.HWND(C.HANDLE(key)), (C.LPELEMENT_EVENT_PROC)(unsafe.Pointer(goElementProc)), C.LPVOID(tag)); ret != HLDOM_OK {
-			domPanic(ret, "Failed to detach event handler from window")
+		if ret := HTMLayoutWindowDetachEventHandler(key, goElementProc, tag); ret != HLDOM_OK {
+			domPanic(C.HLDOM_RESULT(ret), "Failed to detach event handler from window")
 		}
 		delete(windowEventHandlers, hwnd)
 	}
 }
 
+// EXTERN_C VOID HLAPI     HTMLayoutSetCallback(HWND hWndHTMLayout, LPHTMLAYOUT_NOTIFY cb, LPVOID cbParam);
+//sys HTMLayoutSetCallback(hWndHTMLayout uintptr, cb uintptr, cbParam uintptr) = htmlayout.HTMLayoutSetCallback
+
 func AttachNotifyHandler(hwnd uint32, handler *NotifyHandler) {
 	key := uintptr(hwnd)
 	// Overwrite if it exists
 	notifyHandlers[key] = handler
-	C.HTMLayoutSetCallback(C.HWND(C.HANDLE(key)), (C.LPHTMLAYOUT_NOTIFY)(unsafe.Pointer(goNotifyProc)), C.LPVOID(key))
+	HTMLayoutSetCallback(key, goNotifyProc, key)
 }
 
 func DetachNotifyHandler(hwnd uint32) {
 	key := uintptr(hwnd)
 	if _, exists := notifyHandlers[key]; exists {
-		C.HTMLayoutSetCallback(C.HWND(C.HANDLE(key)), nil, nil)
+		HTMLayoutSetCallback(key, 0, 0)
 		delete(notifyHandlers, key)
 	}
 }

@@ -30,10 +30,6 @@ func WinMain(Inst win.HINSTANCE) int32 {
 	fmt.Println("注册窗口类成功", atom)
 
 	// 2. 创建窗口
-	// wnd, err := win.CreateWindow("主窗口类", "golang windows 编程",
-	// 	win.WS_OVERLAPPEDWINDOW, 0,
-	// 	win.CW_USEDEFAULT, win.CW_USEDEFAULT, win.CW_USEDEFAULT, win.CW_USEDEFAULT,
-	// 	0, 0, Inst, 0)
 	wnd := win.CreateWindowEx(win.WS_EX_APPWINDOW,
 		syscall.StringToUTF16Ptr("主窗口类"),
 		nil,

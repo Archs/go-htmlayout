@@ -1,20 +1,20 @@
 package gohl
 
 type EventHandler struct {
-	OnAttached      func(he HELEMENT)
-	OnDetached      func(he HELEMENT)
-	OnMouse         func(he HELEMENT, params *MouseParams) bool
-	OnKey           func(he HELEMENT, params *KeyParams) bool
-	OnFocus         func(he HELEMENT, params *FocusParams) bool
-	OnDraw          func(he HELEMENT, params *DrawParams) bool
-	OnTimer         func(he HELEMENT, params *TimerParams) bool
-	OnBehaviorEvent func(he HELEMENT, params *BehaviorEventParams) bool
-	OnMethodCall    func(he HELEMENT, params *MethodParams) bool
-	OnDataArrived   func(he HELEMENT, params *DataArrivedParams) bool
-	OnSize          func(he HELEMENT)
-	OnScroll        func(he HELEMENT, params *ScrollParams) bool
-	OnExchange      func(he HELEMENT, params *ExchangeParams) bool
-	OnGesture       func(he HELEMENT, params *GestureParams) bool
+	OnAttached      func(he *Element)
+	OnDetached      func(he *Element)
+	OnMouse         func(he *Element, params *MouseParams) bool
+	OnKey           func(he *Element, params *KeyParams) bool
+	OnFocus         func(he *Element, params *FocusParams) bool
+	OnDraw          func(he *Element, params *DrawParams) bool
+	OnTimer         func(he *Element, params *TimerParams) bool
+	OnBehaviorEvent func(he *Element, params *BehaviorEventParams) bool
+	OnMethodCall    func(he *Element, params *MethodParams) bool
+	OnDataArrived   func(he *Element, params *DataArrivedParams) bool
+	OnSize          func(he *Element)
+	OnScroll        func(he *Element, params *ScrollParams) bool
+	OnExchange      func(he *Element, params *ExchangeParams) bool
+	OnGesture       func(he *Element, params *GestureParams) bool
 }
 
 func (e *EventHandler) Subscription() uint {

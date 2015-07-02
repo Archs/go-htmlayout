@@ -517,18 +517,19 @@ type NmhlAttachBehavior struct {
 var goElementProc = syscall.NewCallback(func(tag uintptr, he unsafe.Pointer, evtg uint32, params unsafe.Pointer) C.BOOL {
 	handler := (*EventHandler)(unsafe.Pointer(tag))
 	handled := false
+	el := &Element{handle: HELEMENT(he)}
 
 	switch evtg {
 	case C.HANDLE_INITIALIZATION:
 		if p := (*InitializationParams)(params); p.Cmd == BEHAVIOR_ATTACH {
 			//log.Print("Attach event handler to ", NewElementFromHandle(HELEMENT(he)).Describe())
 			if handler.OnAttached != nil {
-				handler.OnAttached(HELEMENT(he))
+				handler.OnAttached(el)
 			}
 		} else if p.Cmd == BEHAVIOR_DETACH {
-			//log.Print("Detach event handler from ", NewElementFromHandle(HELEMENT(he)).Describe())
+			//log.Print("Detach event handler from ", NewElementFromHandle(el).Describe())
 			if handler.OnDetached != nil {
-				handler.OnDetached(HELEMENT(he))
+				handler.OnDetached(el)
 			}
 
 			// If this was a behavior detaching, decrement the reference count and stop tracking
@@ -546,61 +547,61 @@ var goElementProc = syscall.NewCallback(func(tag uintptr, he unsafe.Pointer, evt
 	case C.HANDLE_MOUSE:
 		if handler.OnMouse != nil {
 			p := (*MouseParams)(params)
-			handled = handler.OnMouse(HELEMENT(he), p)
+			handled = handler.OnMouse(el, p)
 		}
 	case C.HANDLE_KEY:
 		if handler.OnKey != nil {
 			p := (*KeyParams)(params)
-			handled = handler.OnKey(HELEMENT(he), p)
+			handled = handler.OnKey(el, p)
 		}
 	case C.HANDLE_FOCUS:
 		if handler.OnFocus != nil {
 			p := (*FocusParams)(params)
-			handled = handler.OnFocus(HELEMENT(he), p)
+			handled = handler.OnFocus(el, p)
 		}
 	case C.HANDLE_DRAW:
 		if handler.OnDraw != nil {
 			p := (*DrawParams)(params)
-			handled = handler.OnDraw(HELEMENT(he), p)
+			handled = handler.OnDraw(el, p)
 		}
 	case C.HANDLE_TIMER:
 		if handler.OnTimer != nil {
 			p := (*TimerParams)(params)
-			handled = handler.OnTimer(HELEMENT(he), p)
+			handled = handler.OnTimer(el, p)
 		}
 	case C.HANDLE_BEHAVIOR_EVENT:
 		if handler.OnBehaviorEvent != nil {
 			p := (*BehaviorEventParams)(params)
-			handled = handler.OnBehaviorEvent(HELEMENT(he), p)
+			handled = handler.OnBehaviorEvent(el, p)
 		}
 	case C.HANDLE_METHOD_CALL:
 		if handler.OnMethodCall != nil {
 			p := (*MethodParams)(params)
-			handled = handler.OnMethodCall(HELEMENT(he), p)
+			handled = handler.OnMethodCall(el, p)
 		}
 	case C.HANDLE_DATA_ARRIVED:
 		if handler.OnDataArrived != nil {
 			p := (*DataArrivedParams)(params)
-			handled = handler.OnDataArrived(HELEMENT(he), p)
+			handled = handler.OnDataArrived(el, p)
 		}
 	case C.HANDLE_SIZE:
 		if handler.OnSize != nil {
-			handler.OnSize(HELEMENT(he))
+			handler.OnSize(el)
 		}
 	case C.HANDLE_SCROLL:
 		if handler.OnScroll != nil {
 			p := (*ScrollParams)(params)
-			handled = handler.OnScroll(HELEMENT(he), p)
+			handled = handler.OnScroll(el, p)
 		}
 	case C.HANDLE_EXCHANGE:
 		if handler.OnExchange != nil {
 			p := (*ExchangeParams)(params)
-			handled = handler.OnExchange(HELEMENT(he), p)
+			handled = handler.OnExchange(el, p)
 		}
 	case C.HANDLE_GESTURE:
 		if handler.OnGesture != nil {
 			p := (*GestureParams)(params)
-			handled = handler.OnGesture(HELEMENT(he), p)
+			handled = handler.OnGesture(el, p)
 		}
 	default:
 		log.Panic("Unhandled htmlayout event case: ", evtg)

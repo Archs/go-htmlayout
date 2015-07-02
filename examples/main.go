@@ -68,8 +68,8 @@ func ui(hwnd win.HWND) {
 	rs := el.Select("#button")
 	el = rs[0]
 	handler := &gohl.EventHandler{
-		OnMouse: func(he gohl.HELEMENT, params *gohl.MouseParams) bool {
-			log.Println("button clicked", params)
+		OnMouse: func(el *gohl.Element, params *gohl.MouseParams) bool {
+			log.Println("OnMouse:", el, params)
 			return true
 		},
 	}

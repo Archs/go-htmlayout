@@ -1165,15 +1165,27 @@ func (e *Element) SetState(flag uint, on bool) {
 	}
 }
 
-// //
-// // Functions for retrieving/setting the various dimensions of an element
-// //
+//
+// Functions for retrieving/setting the various dimensions of an element
+//
 
-// func (e *Element) Move(x, y int) {
-// 	if ret := C.HTMLayoutMoveElement(e.handle, C.INT(x), C.INT(y)); ret != HLDOM_OK {
-// 		domPanic(ret, "Failed to move element")
-// 	}
-// }
+/** HTMLayoutMoveElement - moves element from its normal place to the position defined by xView, yView.
+ *
+ * \param[in] he \b HELEMENT, element.
+ * \param[in] xView \b INT, new x coordinate of content box of the element relative to the view - htmlayout window.
+ * \param[in] yView \b INT, new y coordinate of content box of the element relative to the view - htmlayout window.
+ *
+ * If element is moved outside of the view then HTMLayoutMoveElement will create popup window for it.
+ *
+ **/
+//
+// EXTERN_C HLDOM_RESULT HLAPI HTMLayoutMoveElement( HELEMENT he, INT xView, INT yView);
+//sys HTMLayoutMoveElement(he HELEMENT, xView int, yView int) (ret HLDOM_RESULT) = htmlayout.HTMLayoutMoveElement
+func (e *Element) Move(x, y int) {
+	if ret := HTMLayoutMoveElement(e.handle, x, y); ret != HLDOM_OK {
+		domPanic2(ret, "Failed to move element")
+	}
+}
 
 // func (e *Element) Resize(x, y, w, h int) {
 // 	if ret := C.HTMLayoutMoveElementEx(e.handle, C.INT(x), C.INT(y), C.INT(w), C.INT(h)); ret != HLDOM_OK {

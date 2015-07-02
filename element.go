@@ -14,7 +14,7 @@ import (
 	"regexp"
 	"runtime"
 	"strconv"
-	// "strings"
+	"strings"
 	"unicode/utf16"
 	"unsafe"
 )
@@ -1325,105 +1325,105 @@ func (e *Element) SetValue(value interface{}) {
 	}
 }
 
-// //
-// // The following are not strictly wrappers of htmlayout functions, but rather convenience
-// // functions that are helpful in common use cases
-// //
+//
+// The following are not strictly wrappers of htmlayout functions, but rather convenience
+// functions that are helpful in common use cases
+//
 
-// func (e *Element) Describe() string {
-// 	s := e.Type()
-// 	if value, exists := e.Attr("id"); exists {
-// 		s += "#" + value
-// 	}
-// 	if value, exists := e.Attr("class"); exists {
-// 		values := strings.Split(value, " ")
-// 		for _, v := range values {
-// 			s += "." + v
-// 		}
-// 	}
-// 	return s
-// }
+func (e *Element) Describe() string {
+	s := e.Type()
+	if value, exists := e.Attr("id"); exists {
+		s += "#" + value
+	}
+	if value, exists := e.Attr("class"); exists {
+		values := strings.Split(value, " ")
+		for _, v := range values {
+			s += "." + v
+		}
+	}
+	return s
+}
 
-// // Returns the first of the child elements matching the selector.  If no elements
-// // match, the function panics
-// func (e *Element) SelectFirst(selector string) *Element {
-// 	results := e.Select(selector)
-// 	if len(results) == 0 {
-// 		panic(fmt.Sprintf("No elements match selector '%s'", selector))
-// 	}
-// 	return results[0]
-// }
+// Returns the first of the child elements matching the selector.  If no elements
+// match, the function panics
+func (e *Element) SelectFirst(selector string) *Element {
+	results := e.Select(selector)
+	if len(results) == 0 {
+		panic(fmt.Sprintf("No elements match selector '%s'", selector))
+	}
+	return results[0]
+}
 
-// // Returns the only child element that matches the selector.  If no elements match
-// // or more than one element matches, the function panics
-// func (e *Element) SelectUnique(selector string) *Element {
-// 	results := e.Select(selector)
-// 	if len(results) == 0 {
-// 		panic(fmt.Sprintf("No elements match selector '%s'", selector))
-// 	} else if len(results) > 1 {
-// 		panic(fmt.Sprintf("More than one element match selector '%s'", selector))
-// 	}
-// 	return results[0]
-// }
+// Returns the only child element that matches the selector.  If no elements match
+// or more than one element matches, the function panics
+func (e *Element) SelectUnique(selector string) *Element {
+	results := e.Select(selector)
+	if len(results) == 0 {
+		panic(fmt.Sprintf("No elements match selector '%s'", selector))
+	} else if len(results) > 1 {
+		panic(fmt.Sprintf("More than one element match selector '%s'", selector))
+	}
+	return results[0]
+}
 
-// // A wrapper of SelectUnique that auto-prepends a hash to the provided id.
-// // Useful when selecting elements base on a programmatically retrieved id (which does
-// // not already have the hash on it)
-// func (e *Element) SelectId(id string) *Element {
-// 	return e.SelectUnique(fmt.Sprintf("#%s", id))
-// }
+// A wrapper of SelectUnique that auto-prepends a hash to the provided id.
+// Useful when selecting elements base on a programmatically retrieved id (which does
+// not already have the hash on it)
+func (e *Element) SelectId(id string) *Element {
+	return e.SelectUnique(fmt.Sprintf("#%s", id))
+}
 
-// //
-// // Functions for manipulating the set of classes applied to this element:
-// //
+//
+// Functions for manipulating the set of classes applied to this element:
+//
 
-// // Returns true if the specified class is among those listed in the "class" attribute.
-// func (e *Element) HasClass(class string) bool {
-// 	if classList, exists := e.Attr("class"); !exists {
-// 		return false
-// 	} else if classes := whitespaceSplitter.FindAllString(classList, -1); classes == nil {
-// 		return false
-// 	} else {
-// 		for _, item := range classes {
-// 			if class == item {
-// 				return true
-// 			}
-// 		}
-// 	}
-// 	return false
-// }
+// Returns true if the specified class is among those listed in the "class" attribute.
+func (e *Element) HasClass(class string) bool {
+	if classList, exists := e.Attr("class"); !exists {
+		return false
+	} else if classes := whitespaceSplitter.FindAllString(classList, -1); classes == nil {
+		return false
+	} else {
+		for _, item := range classes {
+			if class == item {
+				return true
+			}
+		}
+	}
+	return false
+}
 
-// // Adds the specified class to the classes listed in the "class" attribute, or does nothing
-// // if this class is already included in the list.
-// func (e *Element) AddClass(class string) {
-// 	if classList, exists := e.Attr("class"); !exists {
-// 		e.SetAttr("class", class)
-// 	} else if classes := whitespaceSplitter.FindAllString(classList, -1); classes == nil {
-// 		e.SetAttr("class", class)
-// 	} else {
-// 		for _, item := range classes {
-// 			if class == item {
-// 				return
-// 			}
-// 		}
-// 		classes = append(classes, class)
-// 		e.SetAttr("class", strings.Join(classes, " "))
-// 	}
-// }
+// Adds the specified class to the classes listed in the "class" attribute, or does nothing
+// if this class is already included in the list.
+func (e *Element) AddClass(class string) {
+	if classList, exists := e.Attr("class"); !exists {
+		e.SetAttr("class", class)
+	} else if classes := whitespaceSplitter.FindAllString(classList, -1); classes == nil {
+		e.SetAttr("class", class)
+	} else {
+		for _, item := range classes {
+			if class == item {
+				return
+			}
+		}
+		classes = append(classes, class)
+		e.SetAttr("class", strings.Join(classes, " "))
+	}
+}
 
-// // Removes the specified class from the classes listed in the "class" attribute, or does nothing
-// // if this class is not included in the list.
-// func (e *Element) RemoveClass(class string) {
-// 	if classList, exists := e.Attr("class"); exists {
-// 		if classes := whitespaceSplitter.FindAllString(classList, -1); classes != nil {
-// 			for i, item := range classes {
-// 				if class == item {
-// 					// Delete the item from the list
-// 					classes = append(classes[:i], classes[i+1:]...)
-// 					e.SetAttr("class", strings.Join(classes, " "))
-// 					return
-// 				}
-// 			}
-// 		}
-// 	}
-// }
+// Removes the specified class from the classes listed in the "class" attribute, or does nothing
+// if this class is not included in the list.
+func (e *Element) RemoveClass(class string) {
+	if classList, exists := e.Attr("class"); exists {
+		if classes := whitespaceSplitter.FindAllString(classList, -1); classes != nil {
+			for i, item := range classes {
+				if class == item {
+					// Delete the item from the list
+					classes = append(classes[:i], classes[i+1:]...)
+					e.SetAttr("class", strings.Join(classes, " "))
+					return
+				}
+			}
+		}
+	}
+}

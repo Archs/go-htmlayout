@@ -50,6 +50,12 @@ func WinMain(Inst win.HINSTANCE) int32 {
 	fmt.Println("创建窗口成功", wnd)
 	win.ShowWindow(wnd, win.SW_SHOW)
 	win.UpdateWindow(wnd)
+	// load file
+	if err := gohl.LoadFile(wnd, "a.html"); err != nil {
+		println("LoadFile failed", err.Error())
+		return 0
+	}
+	ui(wnd)
 
 	// 3. 主消息循环
 	var msg win.MSG
@@ -63,16 +69,23 @@ func WinMain(Inst win.HINSTANCE) int32 {
 	return int32(msg.WParam)
 }
 
+var (
+	handler = &gohl.EventHandler{
+		OnBehaviorEvent: func(el *gohl.Element, params *gohl.BehaviorEventParams) bool {
+			log.Println("OnBehaviorEvent:", el, params, "|", gohl.BUTTON_CLICK)
+			if params.Cmd == gohl.BUTTON_CLICK {
+				log.Println("button clicked")
+			}
+			return false
+		},
+	}
+)
+
 func ui(hwnd win.HWND) {
+	// gohl.AttachWindowEventHandler(hWnd, handler)
 	el := gohl.GetRootElement(hwnd)
 	rs := el.Select("#button")
 	el = rs[0]
-	handler := &gohl.EventHandler{
-		OnMouse: func(el *gohl.Element, params *gohl.MouseParams) bool {
-			log.Println("OnMouse:", el, params)
-			return true
-		},
-	}
 	el.AttachHandler(handler)
 }
 
@@ -87,11 +100,8 @@ func WndProc(hWnd win.HWND, message uint32, wParam uintptr, lParam uintptr) uint
 		return uintptr(ret)
 	}
 	switch message {
-	case win.WM_CREATE:
-		if err := gohl.LoadFile(hWnd, "a.html"); err != nil {
-			println("LoadFile failed", err.Error())
-		}
-		go ui(hWnd)
+	// case win.WM_CREATE:
+	// 	ui(hWnd)
 	default:
 		return win.DefWindowProc(hWnd, message, wParam, lParam)
 	}

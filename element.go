@@ -1207,65 +1207,67 @@ func (e *Element) Resize(x, y, w, h int) {
 	}
 }
 
-// func (e *Element) getRect(rectTypeFlags uint32) (left, top, right, bottom int) {
-// 	r := Rect{}
-// 	if ret := C.HTMLayoutGetElementLocation(e.handle, (C.LPRECT)(unsafe.Pointer(&r)), C.UINT(rectTypeFlags)); ret != HLDOM_OK {
-// 		domPanic(ret, "Failed to get element rect")
-// 	}
-// 	return int(r.Left), int(r.Top), int(r.Right), int(r.Bottom)
-// }
+// EXTERN_C  HLDOM_RESULT HLAPI HTMLayoutGetElementLocation(HELEMENT he, LPRECT p_location, UINT areas /*ELEMENT_AREAS*/);
+//sys HTMLayoutGetElementLocation(he HELEMENT, p_location *Rect, areas uint) (ret HLDOM_RESULT) = htmlayout.HTMLayoutGetElementLocation
+func (e *Element) getRect(rectTypeFlags uint) (left, top, right, bottom int) {
+	r := Rect{}
+	if ret := HTMLayoutGetElementLocation(e.handle, &r, rectTypeFlags); ret != HLDOM_OK {
+		domPanic2(ret, "Failed to get element rect")
+	}
+	return int(r.Left), int(r.Top), int(r.Right), int(r.Bottom)
+}
 
-// func (e *Element) ContentBox() (left, top, right, bottom int) {
-// 	return e.getRect(CONTENT_BOX)
-// }
+func (e *Element) ContentBox() (left, top, right, bottom int) {
+	return e.getRect(CONTENT_BOX)
+}
 
-// func (e *Element) ContentViewBox() (left, top, right, bottom int) {
-// 	return e.getRect(CONTENT_BOX | VIEW_RELATIVE)
-// }
+func (e *Element) ContentViewBox() (left, top, right, bottom int) {
+	return e.getRect(CONTENT_BOX | VIEW_RELATIVE)
+}
 
-// func (e *Element) ContentBoxSize() (width, height int) {
-// 	l, t, r, b := e.getRect(CONTENT_BOX)
-// 	return int(r - l), int(b - t)
-// }
+func (e *Element) ContentBoxSize() (width, height int) {
+	l, t, r, b := e.getRect(CONTENT_BOX)
+	return int(r - l), int(b - t)
+}
 
-// func (e *Element) PaddingBox() (left, top, right, bottom int) {
-// 	return e.getRect(PADDING_BOX)
-// }
+func (e *Element) PaddingBox() (left, top, right, bottom int) {
+	return e.getRect(PADDING_BOX)
+}
 
-// func (e *Element) PaddingViewBox() (left, top, right, bottom int) {
-// 	return e.getRect(PADDING_BOX | VIEW_RELATIVE)
-// }
+func (e *Element) PaddingViewBox() (left, top, right, bottom int) {
+	return e.getRect(PADDING_BOX | VIEW_RELATIVE)
+}
 
-// func (e *Element) PaddingBoxSize() (width, height int) {
-// 	l, t, r, b := e.getRect(PADDING_BOX)
-// 	return int(r - l), int(b - t)
-// }
+func (e *Element) PaddingBoxSize() (width, height int) {
+	l, t, r, b := e.getRect(PADDING_BOX)
+	return int(r - l), int(b - t)
+}
 
-// func (e *Element) BorderBox() (left, top, right, bottom int) {
-// 	return e.getRect(BORDER_BOX)
-// }
+func (e *Element) BorderBox() (left, top, right, bottom int) {
+	return e.getRect(BORDER_BOX)
+}
 
-// func (e *Element) BorderViewBox() (left, top, right, bottom int) {
-// 	return e.getRect(BORDER_BOX | VIEW_RELATIVE)
-// }
+func (e *Element) BorderViewBox() (left, top, right, bottom int) {
+	return e.getRect(BORDER_BOX | VIEW_RELATIVE)
+}
 
-// func (e *Element) BorderBoxSize() (width, height int) {
-// 	l, t, r, b := e.getRect(BORDER_BOX)
-// 	return int(r - l), int(b - t)
-// }
+func (e *Element) BorderBoxSize() (width, height int) {
+	l, t, r, b := e.getRect(BORDER_BOX)
+	return int(r - l), int(b - t)
+}
 
-// func (e *Element) MarginBox() (left, top, right, bottom int) {
-// 	return e.getRect(MARGIN_BOX)
-// }
+func (e *Element) MarginBox() (left, top, right, bottom int) {
+	return e.getRect(MARGIN_BOX)
+}
 
-// func (e *Element) MarginViewBox() (left, top, right, bottom int) {
-// 	return e.getRect(MARGIN_BOX | VIEW_RELATIVE)
-// }
+func (e *Element) MarginViewBox() (left, top, right, bottom int) {
+	return e.getRect(MARGIN_BOX | VIEW_RELATIVE)
+}
 
-// func (e *Element) MarginBoxSize() (width, height int) {
-// 	l, t, r, b := e.getRect(MARGIN_BOX)
-// 	return int(r - l), int(b - t)
-// }
+func (e *Element) MarginBoxSize() (width, height int) {
+	l, t, r, b := e.getRect(MARGIN_BOX)
+	return int(r - l), int(b - t)
+}
 
 // //
 // // Functions for retrieving/setting the value in widget input controls

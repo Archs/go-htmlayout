@@ -1134,33 +1134,36 @@ func (e *Element) StateFlags() uint {
 	return state
 }
 
-// // Replaces the whole set of state flags with the specified value
-// func (e *Element) SetStateFlags(flags uint32) {
-// 	shouldUpdate := C.BOOL(1)
-// 	if ret := C.HTMLayoutSetElementState(e.handle, C.UINT(flags), C.UINT(^flags), shouldUpdate); ret != HLDOM_OK {
-// 		domPanic(ret, "Failed to set element state flags")
-// 	}
-// }
+// EXTERN_C HLDOM_RESULT HLAPI HTMLayoutSetElementState( HELEMENT he, UINT stateBitsToSet, UINT stateBitsToClear, BOOL updateView);
+//sys HTMLayoutSetElementState(he HELEMENT, stateBitsToSet uint, stateBitsToClear uint, updateView BOOL) (ret HLDOM_RESULT) = htmlayout.HTMLayoutSetElementState
 
-// // Returns true if the specified flag is "on"
-// func (e *Element) State(flag uint32) bool {
-// 	return e.StateFlags()&flag != 0
-// }
+// Replaces the whole set of state flags with the specified value
+func (e *Element) SetStateFlags(flags uint) {
+	shouldUpdate := BOOL(1)
+	if ret := HTMLayoutSetElementState(e.handle, flags, ^flags, shouldUpdate); ret != HLDOM_OK {
+		domPanic2(ret, "Failed to set element state flags")
+	}
+}
 
-// // Sets the specified flag to "on" or "off" according to the value of the provided boolean
-// func (e *Element) SetState(flag uint32, on bool) {
-// 	addBits := uint32(0)
-// 	clearBits := uint32(0)
-// 	if on {
-// 		addBits = flag
-// 	} else {
-// 		clearBits = flag
-// 	}
-// 	shouldUpdate := C.BOOL(1)
-// 	if ret := C.HTMLayoutSetElementState(e.handle, C.UINT(addBits), C.UINT(clearBits), shouldUpdate); ret != HLDOM_OK {
-// 		domPanic(ret, "Failed to set element state flag")
-// 	}
-// }
+// Returns true if the specified flag is "on"
+func (e *Element) State(flag uint) bool {
+	return e.StateFlags()&flag != 0
+}
+
+// Sets the specified flag to "on" or "off" according to the value of the provided boolean
+func (e *Element) SetState(flag uint, on bool) {
+	addBits := uint(0)
+	clearBits := uint(0)
+	if on {
+		addBits = flag
+	} else {
+		clearBits = flag
+	}
+	shouldUpdate := BOOL(1)
+	if ret := HTMLayoutSetElementState(e.handle, addBits, clearBits, shouldUpdate); ret != HLDOM_OK {
+		domPanic2(ret, "Failed to set element state flag")
+	}
+}
 
 // //
 // // Functions for retrieving/setting the various dimensions of an element

@@ -5,13 +5,12 @@ package gohl
 import "C"
 
 import (
+	"errors"
 	"github.com/lxn/win"
 	"reflect"
 	"syscall"
 
-	// "errors"
 	"fmt"
-	// "reflect"
 	"regexp"
 	"runtime"
 	"strconv"
@@ -1269,34 +1268,48 @@ func (e *Element) MarginBoxSize() (width, height int) {
 	return int(r - l), int(b - t)
 }
 
-// //
-// // Functions for retrieving/setting the value in widget input controls
-// //
+//
+// Functions for retrieving/setting the value in widget input controls
+//
 
-// type textValueParams struct {
-// 	MethodId uint32
-// 	Text     *uint16
-// 	Length   uint32
-// }
+type METHOD_PARAMS struct {
+	MethodId uint32
+	Text     *uint16
+	Length   uint32
+}
 
-// func (e *Element) ValueAsString() (string, error) {
-// 	args := &textValueParams{MethodId: GET_TEXT_VALUE}
-// 	ret := C.HTMLayoutCallBehaviorMethod(e.handle, (*C.METHOD_PARAMS)(unsafe.Pointer(args)))
-// 	if ret == HLDOM_OK_NOT_HANDLED {
-// 		domPanic(ret, "This type of element does not provide data in this way.  Try a <widget>.")
-// 	} else if ret != HLDOM_OK {
-// 		domPanic(ret, "Could not get text value")
-// 	}
-// 	if args.Text == nil {
-// 		return "", errors.New("Nil string pointer")
-// 	}
-// 	return utf16ToStringLength(args.Text, int(args.Length)), nil
-// }
+// type METHOD_PARAMS C.METHOD_PARAMS
+
+// typedef struct _METHOD_PARAMS METHOD_PARAMS;
+//
+/** HTMLayoutCallMethod - calls behavior specific method.
+ * \param[in] he \b HELEMENT, element - source of the event.
+ * \param[in] params \b METHOD_PARAMS, pointer to method param block
+ **/
+//
+// EXTERN_C HLDOM_RESULT HLAPI HTMLayoutCallBehaviorMethod(
+//           HELEMENT he, METHOD_PARAMS* params);
+//sys HTMLayoutCallBehaviorMethod(he HELEMENT, params *METHOD_PARAMS) (ret HLDOM_RESULT) = htmlayout.HTMLayoutCallBehaviorMethod
+
+// calls behavior specific method.
+func (e *Element) ValueAsString() (string, error) {
+	args := &METHOD_PARAMS{MethodId: GET_TEXT_VALUE}
+	ret := HTMLayoutCallBehaviorMethod(e.handle, args)
+	if ret == HLDOM_OK_NOT_HANDLED {
+		domPanic2(ret, "This type of element does not provide data in this way.  Try a <widget>.")
+	} else if ret != HLDOM_OK {
+		domPanic2(ret, "Could not get text value")
+	}
+	if args.Text == nil {
+		return "", errors.New("Nil string pointer")
+	}
+	return utf16ToStringLength(args.Text, int(args.Length)), nil
+}
 
 // func (e *Element) SetValue(value interface{}) {
 // 	switch v := value.(type) {
 // 	case string:
-// 		args := &textValueParams{
+// 		args := &METHOD_PARAMS{
 // 			MethodId: SET_TEXT_VALUE,
 // 			Text:     stringToUtf16Ptr(v),
 // 			Length:   uint32(len(v)),

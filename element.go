@@ -240,7 +240,7 @@ func NewElementFromHandle(h HELEMENT) *Element {
 * \param[out ] phe \b #HELEMENT*, variable to receive handle of the element
  **/
 // EXTERN_C HLDOM_RESULT HLAPI HTMLayoutCreateElement( LPCSTR tagname, LPCWSTR textOrNull, /*out*/ HELEMENT *phe );
-//sys HTMLayoutCreateElement(tagname string, textOrNull *uint16, phe *HELEMENT) (ret HLDOM_RESULT, err error) [failretval == 0] = htmlayout.HTMLayoutCreateElement
+//sys HTMLayoutCreateElement(tagname string, textOrNull *uint16, phe *HELEMENT) (ret HLDOM_RESULT, err error) [failretval != 0] = htmlayout.HTMLayoutCreateElement
 
 func NewElement(tagName string) *Element {
 	var handle HELEMENT = BAD_HELEMENT
@@ -259,7 +259,7 @@ func NewElement(tagName string) *Element {
  * Root DOM object is always a 'HTML' element of the document.
  **/
 // EXTERN_C  HLDOM_RESULT HLAPI HTMLayoutGetRootElement(HWND hwnd, HELEMENT *phe);
-//sys HTMLayoutGetRootElement(hwnd HWND, pheT *HELEMENT) (ret HLDOM_RESULT, err error) [failretval == 0] = htmlayout.HTMLayoutGetRootElement
+//sys HTMLayoutGetRootElement(hwnd HWND, pheT *HELEMENT) (ret HLDOM_RESULT, err error) [failretval != 0] = htmlayout.HTMLayoutGetRootElement
 
 func GetRootElement(hwnd win.HWND) *Element {
 	var handle HELEMENT = BAD_HELEMENT
@@ -280,7 +280,7 @@ func GetRootElement(hwnd win.HWND) *Element {
  * COMMENT: To set focus on element use HTMLayoutSetElementState(STATE_FOCUS,0)
  **/
 // EXTERN_C  HLDOM_RESULT HLAPI HTMLayoutGetFocusElement(HWND hwnd, HELEMENT *phe);
-//sys HTMLayoutGetFocusElement(hwnd HWND, pheT *HELEMENT) (ret HLDOM_RESULT, err error) [failretval == 0] = htmlayout.HTMLayoutGetFocusElement
+//sys HTMLayoutGetFocusElement(hwnd HWND, pheT *HELEMENT) (ret HLDOM_RESULT, err error) [failretval != 0] = htmlayout.HTMLayoutGetFocusElement
 func GetFocusedElement(hwnd win.HWND) *Element {
 	var handle HELEMENT = BAD_HELEMENT
 	if ret, err := HTMLayoutGetFocusElement(HWND(hwnd), &handle); err != nil {

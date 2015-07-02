@@ -6,6 +6,8 @@ import "C"
 
 import (
 	"github.com/lxn/win"
+	"reflect"
+	"syscall"
 
 	// "errors"
 	"fmt"
@@ -962,113 +964,157 @@ func (e *Element) AttrAsInt(key string) (int, bool, error) {
  * \return \b #HLDOM_RESULT
  **/
 // EXTERN_C  HLDOM_RESULT HLAPI HTMLayoutSetAttributeByName(HELEMENT he, LPCSTR name, LPCWSTR value);
-//sys HTMLayoutGetAttributeByName(he HELEMENT, utf8bytes *byte, p_value uintptr) (ret HLDOM_RESULT) = htmlayout.HTMLayoutGetAttributeByName
+//sys HTMLayoutSetAttributeByName(he HELEMENT, name *byte, value *uint16) (ret HLDOM_RESULT) = htmlayout.HTMLayoutSetAttributeByName
 
-// func (e *Element) SetAttr(key string, value interface{}) {
-// 	szKey := C.CString(key)
-// 	defer C.free(unsafe.Pointer(szKey))
-// 	var ret C.HLDOM_RESULT = HLDOM_OK
-// 	switch v := value.(type) {
-// 	case string:
-// 		ret = C.HTMLayoutSetAttributeByName(e.handle, (*C.CHAR)(szKey), (*C.WCHAR)(stringToUtf16Ptr(v)))
-// 	case float32:
-// 		ret = C.HTMLayoutSetAttributeByName(e.handle, (*C.CHAR)(szKey), (*C.WCHAR)(stringToUtf16Ptr(strconv.FormatFloat(float64(v), 'g', -1, 64))))
-// 	case float64:
-// 		ret = C.HTMLayoutSetAttributeByName(e.handle, (*C.CHAR)(szKey), (*C.WCHAR)(stringToUtf16Ptr(strconv.FormatFloat(float64(v), 'g', -1, 64))))
-// 	case int:
-// 		ret = C.HTMLayoutSetAttributeByName(e.handle, (*C.CHAR)(szKey), (*C.WCHAR)(stringToUtf16Ptr(strconv.Itoa(v))))
-// 	case int32:
-// 		ret = C.HTMLayoutSetAttributeByName(e.handle, (*C.CHAR)(szKey), (*C.WCHAR)(stringToUtf16Ptr(strconv.FormatInt(int64(v), 10))))
-// 	case int64:
-// 		ret = C.HTMLayoutSetAttributeByName(e.handle, (*C.CHAR)(szKey), (*C.WCHAR)(stringToUtf16Ptr(strconv.FormatInt(v, 10))))
-// 	case nil:
-// 		ret = C.HTMLayoutSetAttributeByName(e.handle, (*C.CHAR)(szKey), nil)
-// 	default:
-// 		panic(fmt.Sprintf("Don't know how to format this argument type: %s", reflect.TypeOf(v)))
-// 	}
-// 	if ret != HLDOM_OK {
-// 		domPanic(ret, "Failed to set attribute: "+key)
-// 	}
-// }
+func (e *Element) SetAttr(key string, value interface{}) {
+	szKey := syscall.StringBytePtr(key)
+	var ret HLDOM_RESULT = HLDOM_OK
+	switch v := value.(type) {
+	case string:
+		ret = HTMLayoutSetAttributeByName(e.handle, szKey, stringToUtf16Ptr(v))
+	case float32:
+		ret = HTMLayoutSetAttributeByName(e.handle, szKey, stringToUtf16Ptr(strconv.FormatFloat(float64(v), 'g', -1, 64)))
+	case float64:
+		ret = HTMLayoutSetAttributeByName(e.handle, szKey, stringToUtf16Ptr(strconv.FormatFloat(float64(v), 'g', -1, 64)))
+	case int:
+		ret = HTMLayoutSetAttributeByName(e.handle, szKey, stringToUtf16Ptr(strconv.Itoa(v)))
+	case int32:
+		ret = HTMLayoutSetAttributeByName(e.handle, szKey, stringToUtf16Ptr(strconv.FormatInt(int64(v), 10)))
+	case int64:
+		ret = HTMLayoutSetAttributeByName(e.handle, szKey, stringToUtf16Ptr(strconv.FormatInt(v, 10)))
+	case nil:
+		ret = HTMLayoutSetAttributeByName(e.handle, szKey, nil)
+	default:
+		panic(fmt.Sprintf("Don't know how to format this argument type: %s", reflect.TypeOf(v)))
+	}
+	if ret != HLDOM_OK {
+		domPanic2(ret, "Failed to set attribute: "+key)
+	}
+}
 
-// func (e *Element) RemoveAttr(key string) {
-// 	e.SetAttr(key, nil)
-// }
+func (e *Element) RemoveAttr(key string) {
+	e.SetAttr(key, nil)
+}
 
-// func (e *Element) AttrByIndex(index int) (string, string) {
-// 	szValue := (*C.WCHAR)(nil)
-// 	szName := (*C.CHAR)(nil)
-// 	if ret := C.HTMLayoutGetNthAttribute(e.handle, C.UINT(index), (*C.LPCSTR)(&szName), (*C.LPCWSTR)(&szValue)); ret != HLDOM_OK {
-// 		domPanic(ret, fmt.Sprintf("Failed to get attribute by index: %u", index))
-// 	}
-// 	return C.GoString((*C.char)(szName)), utf16ToString((*uint16)(szValue))
-// }
+/**Get value of any element's attribute by attribute's number.
+ * \param[in] he \b #HELEMENT
+ * \param[in] n \b UINT, number of desired attribute
+ * \param[out] p_name \b LPCSTR*, will be set to address of the string
+ * containing attribute name
+ * \param[out] p_value \b LPCWSTR*, will be set to address of the string
+ * containing attribute value
+ * \return \b #HLDOM_RESULT
+ **/
+// EXTERN_C  HLDOM_RESULT HLAPI HTMLayoutGetNthAttribute(HELEMENT he, UINT n, LPCSTR* p_name, LPCWSTR* p_value);
+//sys HTMLayoutGetNthAttribute(he HELEMENT, n uint, name uintptr, value uintptr) (ret HLDOM_RESULT) = htmlayout.HTMLayoutGetNthAttribute
 
-// func (e *Element) AttrCount() uint {
-// 	var count C.UINT = 0
-// 	if ret := C.HTMLayoutGetAttributeCount(e.handle, &count); ret != HLDOM_OK {
-// 		domPanic(ret, "Failed to get attribute count")
-// 	}
-// 	return uint(count)
-// }
+func (e *Element) AttrByIndex(index int) (string, string) {
+	szName := (*C.CHAR)(nil)
+	szValue := (*C.WCHAR)(nil)
+	if ret := HTMLayoutGetNthAttribute(e.handle, uint(index), uintptr(unsafe.Pointer(&szName)), uintptr(unsafe.Pointer(&szValue))); ret != HLDOM_OK {
+		domPanic2(ret, fmt.Sprintf("Failed to get attribute by index: %u", index))
+	}
+	return C.GoString((*C.char)(szName)), utf16ToString((*uint16)(szValue))
+}
 
-// //
-// // CSS style attribute accessors/mutators
-// //
+/**Get number of element's attributes.
+ * \param[in] he \b #HELEMENT
+ * \param[out] p_count \b LPUINT, variable to receive number of element
+ * attributes.
+ * \return \b #HLDOM_RESULT
+ **/
+// EXTERN_C  HLDOM_RESULT HLAPI HTMLayoutGetAttributeCount(HELEMENT he, LPUINT p_count);
+//sys HTMLayoutGetAttributeCount(he HELEMENT, p_count *uint) (ret HLDOM_RESULT) = htmlayout.HTMLayoutGetAttributeCount
 
-// // Returns the value of the style and a boolean indicating whether or not that style exists.
-// // If the boolean is true, then the returned string is valid.
-// func (e *Element) Style(key string) (string, bool) {
-// 	szValue := (*C.WCHAR)(nil)
-// 	szKey := C.CString(key)
-// 	defer C.free(unsafe.Pointer(szKey))
-// 	if ret := C.HTMLayoutGetStyleAttribute(e.handle, (*C.CHAR)(szKey), (*C.LPCWSTR)(&szValue)); ret != HLDOM_OK {
-// 		domPanic(ret, "Failed to get style: "+key)
-// 	}
-// 	if szValue != nil {
-// 		return utf16ToString((*uint16)(szValue)), true
-// 	}
-// 	return "", false
-// }
+func (e *Element) AttrCount() uint {
+	var count uint = 0
+	if ret := HTMLayoutGetAttributeCount(e.handle, &count); ret != HLDOM_OK {
+		domPanic2(ret, "Failed to get attribute count")
+	}
+	return count
+}
 
-// func (e *Element) SetStyle(key string, value interface{}) {
-// 	szKey := C.CString(key)
-// 	defer C.free(unsafe.Pointer(szKey))
-// 	var valuePtr *uint16 = nil
+//
+// CSS style attribute accessors/mutators
+//
 
-// 	switch v := value.(type) {
-// 	case string:
-// 		valuePtr = stringToUtf16Ptr(v)
-// 	case float32:
-// 		valuePtr = stringToUtf16Ptr(strconv.FormatFloat(float64(v), 'g', -1, 64))
-// 	case float64:
-// 		valuePtr = stringToUtf16Ptr(strconv.FormatFloat(float64(v), 'g', -1, 64))
-// 	case int:
-// 		valuePtr = stringToUtf16Ptr(strconv.Itoa(v))
-// 	case int32:
-// 		valuePtr = stringToUtf16Ptr(strconv.FormatInt(int64(v), 10))
-// 	case int64:
-// 		valuePtr = stringToUtf16Ptr(strconv.FormatInt(v, 10))
-// 	case nil:
-// 		valuePtr = nil
-// 	default:
-// 		panic(fmt.Sprintf("Don't know how to format this argument type: %s", reflect.TypeOf(v)))
-// 	}
+/**Get element's style attribute.
+ * \param[in] he \b #HELEMENT
+ * \param[in] name \b LPCSTR, name of the style attribute
+ * \param[out] p_value \b LPCWSTR*, variable to receive value of the style attribute.
+ *
+ * Style attributes are those that are set using css. E.g. "font-face: arial" or "display: block".
+ *
+ * \sa #HTMLayoutSetStyleAttribute()
+ **/
+// EXTERN_C  HLDOM_RESULT HLAPI HTMLayoutGetStyleAttribute(HELEMENT he, LPCSTR name, LPCWSTR* p_value);
+//sys HTMLayoutGetStyleAttribute(he HELEMENT, name uintptr,  p_value uintptr) (ret HLDOM_RESULT) = htmlayout.HTMLayoutGetStyleAttribute
 
-// 	if ret := C.HTMLayoutSetStyleAttribute(e.handle, (*C.CHAR)(szKey), (*C.WCHAR)(valuePtr)); ret != HLDOM_OK {
-// 		domPanic(ret, "Failed to set style: "+key)
-// 	}
-// }
+// Returns the value of the style and a boolean indicating whether or not that style exists.
+// If the boolean is true, then the returned string is valid.
+func (e *Element) Style(key string) (string, bool) {
+	szValue := (*C.WCHAR)(nil)
+	szKey := C.CString(key)
+	defer C.free(unsafe.Pointer(szKey))
+	if ret := HTMLayoutGetStyleAttribute(e.handle, uintptr(unsafe.Pointer(szKey)), uintptr(unsafe.Pointer(&szValue))); ret != HLDOM_OK {
+		domPanic2(ret, "Failed to get style: "+key)
+	}
+	if szValue != nil {
+		return utf16ToString((*uint16)(szValue)), true
+	}
+	return "", false
+}
 
-// func (e *Element) RemoveStyle(key string) {
-// 	e.SetStyle(key, nil)
-// }
+/**Get element's style attribute.
+ * \param[in] he \b #HELEMENT
+ * \param[in] name \b LPCSTR, name of the style attribute
+ * \param[out] value \b LPCWSTR, value of the style attribute or NULL for clearing the attribute
+ *
+ * Style attributes are those that are set using css. E.g. "font-face: arial" or "display: block".
+ *
+ * \sa #HTMLayoutGetStyleAttribute()
+ **/
+// EXTERN_C  HLDOM_RESULT HLAPI HTMLayoutSetStyleAttribute(HELEMENT he, LPCSTR name, LPCWSTR value);
+//sys HTMLayoutSetStyleAttribute(he HELEMENT, name uintptr,  value uintptr) (ret HLDOM_RESULT) = htmlayout.HTMLayoutSetStyleAttribute
 
-// func (e *Element) ClearStyles(key string) {
-// 	if ret := C.HTMLayoutSetStyleAttribute(e.handle, nil, nil); ret != HLDOM_OK {
-// 		domPanic(ret, "Failed to clear all styles")
-// 	}
-// }
+func (e *Element) SetStyle(key string, value interface{}) {
+	szKey := C.CString(key)
+	defer C.free(unsafe.Pointer(szKey))
+	var valuePtr *uint16 = nil
+
+	switch v := value.(type) {
+	case string:
+		valuePtr = stringToUtf16Ptr(v)
+	case float32:
+		valuePtr = stringToUtf16Ptr(strconv.FormatFloat(float64(v), 'g', -1, 64))
+	case float64:
+		valuePtr = stringToUtf16Ptr(strconv.FormatFloat(float64(v), 'g', -1, 64))
+	case int:
+		valuePtr = stringToUtf16Ptr(strconv.Itoa(v))
+	case int32:
+		valuePtr = stringToUtf16Ptr(strconv.FormatInt(int64(v), 10))
+	case int64:
+		valuePtr = stringToUtf16Ptr(strconv.FormatInt(v, 10))
+	case nil:
+		valuePtr = nil
+	default:
+		panic(fmt.Sprintf("Don't know how to format this argument type: %s", reflect.TypeOf(v)))
+	}
+
+	if ret := HTMLayoutSetStyleAttribute(e.handle, uintptr(unsafe.Pointer(szKey)), uintptr(unsafe.Pointer(valuePtr))); ret != HLDOM_OK {
+		domPanic2(ret, "Failed to set style: "+key)
+	}
+}
+
+func (e *Element) RemoveStyle(key string) {
+	e.SetStyle(key, nil)
+}
+
+func (e *Element) ClearStyles(key string) {
+	if ret := HTMLayoutSetStyleAttribute(e.handle, 0, 0); ret != HLDOM_OK {
+		domPanic2(ret, "Failed to clear all styles")
+	}
+}
 
 // //
 // // Element state manipulation

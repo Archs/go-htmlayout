@@ -281,7 +281,7 @@ func GetRootElement(hwnd win.HWND) *Element {
  **/
 // EXTERN_C  HLDOM_RESULT HLAPI HTMLayoutGetFocusElement(HWND hwnd, HELEMENT *phe);
 //sys HTMLayoutGetFocusElement(hwnd HWND, pheT *HELEMENT) (ret HLDOM_RESULT, err error) [failretval == 0] = htmlayout.HTMLayoutGetFocusElement
-func GetFocusedElement(hwnd uint32) *Element {
+func GetFocusedElement(hwnd win.HWND) *Element {
 	var handle HELEMENT = BAD_HELEMENT
 	if ret, err := HTMLayoutGetFocusElement(HWND(hwnd), &handle); err != nil {
 		domPanic2(ret, "Failed to get focus element")

@@ -1306,24 +1306,24 @@ func (e *Element) ValueAsString() (string, error) {
 	return utf16ToStringLength(args.Text, int(args.Length)), nil
 }
 
-// func (e *Element) SetValue(value interface{}) {
-// 	switch v := value.(type) {
-// 	case string:
-// 		args := &METHOD_PARAMS{
-// 			MethodId: SET_TEXT_VALUE,
-// 			Text:     stringToUtf16Ptr(v),
-// 			Length:   uint32(len(v)),
-// 		}
-// 		ret := C.HTMLayoutCallBehaviorMethod(e.handle, (*C.METHOD_PARAMS)(unsafe.Pointer(args)))
-// 		if ret == HLDOM_OK_NOT_HANDLED {
-// 			domPanic(ret, "This type of element does not accept data in this way.  Try a <widget>.")
-// 		} else if ret != HLDOM_OK {
-// 			domPanic(ret, "Could not set text value")
-// 		}
-// 	default:
-// 		panic("Don't know how to set values of this type")
-// 	}
-// }
+func (e *Element) SetValue(value interface{}) {
+	switch v := value.(type) {
+	case string:
+		args := &METHOD_PARAMS{
+			MethodId: SET_TEXT_VALUE,
+			Text:     stringToUtf16Ptr(v),
+			Length:   uint32(len(v)),
+		}
+		ret := HTMLayoutCallBehaviorMethod(e.handle, args)
+		if ret == HLDOM_OK_NOT_HANDLED {
+			domPanic2(ret, "This type of element does not accept data in this way.  Try a <widget>.")
+		} else if ret != HLDOM_OK {
+			domPanic2(ret, "Could not set text value")
+		}
+	default:
+		panic("Don't know how to set values of this type")
+	}
+}
 
 // //
 // // The following are not strictly wrappers of htmlayout functions, but rather convenience

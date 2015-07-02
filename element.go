@@ -1116,18 +1116,23 @@ func (e *Element) ClearStyles(key string) {
 	}
 }
 
-// //
-// // Element state manipulation
-// //
+//
+// Element state manipulation
+//
 
-// // Gets the whole set of state flags for this element
-// func (e *Element) StateFlags() uint32 {
-// 	var state C.UINT
-// 	if ret := C.HTMLayoutGetElementState(e.handle, &state); ret != HLDOM_OK {
-// 		domPanic(ret, "Failed to get element state flags")
-// 	}
-// 	return uint32(state)
-// }
+/** Get/set state bits, stateBits*** accept or'ed values above
+ **/
+// EXTERN_C HLDOM_RESULT HLAPI HTMLayoutGetElementState( HELEMENT he, UINT* pstateBits);
+//sys HTMLayoutGetElementState(he HELEMENT, pstateBits *uint) (ret HLDOM_RESULT) = htmlayout.HTMLayoutGetElementState
+
+// Gets the whole set of state flags for this element
+func (e *Element) StateFlags() uint {
+	var state uint
+	if ret := HTMLayoutGetElementState(e.handle, &state); ret != HLDOM_OK {
+		domPanic2(ret, "Failed to get element state flags")
+	}
+	return state
+}
 
 // // Replaces the whole set of state flags with the specified value
 // func (e *Element) SetStateFlags(flags uint32) {

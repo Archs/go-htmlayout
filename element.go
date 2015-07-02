@@ -299,8 +299,7 @@ func (e *Element) finalize() {
 	if attachedHandlers, hasHandlers := eventHandlers[e.handle]; hasHandlers {
 		for handler := range attachedHandlers {
 			tag := uintptr(unsafe.Pointer(handler))
-			println(tag)
-			HTMLayoutDetachEventHandler(uintptr(e.handle), goElementProc, tag)
+			HTMLayoutDetachEventHandler(e.handle, goElementProc, tag)
 		}
 		delete(eventHandlers, e.handle)
 	}
@@ -337,13 +336,12 @@ func (e *Element) Equals(other *Element) bool {
 // dispatch method can tell if an event handler is a behavior or a regular handler.
 func (e *Element) attachBehavior(handler *EventHandler) {
 	tag := uintptr(unsafe.Pointer(handler))
-	eh := uintptr(unsafe.Pointer(e.handle))
 	if subscription := handler.Subscription(); subscription == HANDLE_ALL {
-		if ret := HTMLayoutAttachEventHandler(eh, goElementProc, tag); ret != HLDOM_OK {
+		if ret := HTMLayoutAttachEventHandler(e.handle, goElementProc, tag); ret != HLDOM_OK {
 			domPanic2(ret, "Failed to attach event handler to element")
 		}
 	} else {
-		if ret := HTMLayoutAttachEventHandlerEx(eh, goElementProc, tag, subscription); ret != HLDOM_OK {
+		if ret := HTMLayoutAttachEventHandlerEx(e.handle, goElementProc, tag, subscription); ret != HLDOM_OK {
 			domPanic2(ret, "Failed to attach event handler to element")
 		}
 	}
@@ -364,13 +362,12 @@ func (e *Element) AttachHandler(handler *EventHandler) {
 	subscription &= ^uint(DISABLE_INITIALIZATION & 0xffffffff)
 
 	tag := uintptr(unsafe.Pointer(handler))
-	eh := uintptr(unsafe.Pointer(e.handle))
 	if subscription == HANDLE_ALL {
-		if ret := HTMLayoutAttachEventHandler(eh, goElementProc, tag); ret != HLDOM_OK {
+		if ret := HTMLayoutAttachEventHandler(e.handle, goElementProc, tag); ret != HLDOM_OK {
 			domPanic2(ret, "Failed to attach event handler to element")
 		}
 	} else {
-		if ret := HTMLayoutAttachEventHandlerEx(eh, goElementProc, tag, subscription); ret != HLDOM_OK {
+		if ret := HTMLayoutAttachEventHandlerEx(e.handle, goElementProc, tag, subscription); ret != HLDOM_OK {
 			domPanic2(ret, "Failed to attach event handler to element")
 		}
 	}
@@ -385,7 +382,7 @@ func (e *Element) DetachHandler(handler *EventHandler) {
 	tag := uintptr(unsafe.Pointer(handler))
 	if attachedHandlers, exists := eventHandlers[e.handle]; exists {
 		if _, exists := attachedHandlers[handler]; exists {
-			if ret := HTMLayoutDetachEventHandler(uintptr(e.handle), goElementProc, tag); ret != HLDOM_OK {
+			if ret := HTMLayoutDetachEventHandler(e.handle, goElementProc, tag); ret != HLDOM_OK {
 				domPanic2(ret, "Failed to detach event handler from element")
 			}
 			delete(attachedHandlers, handler)
@@ -407,7 +404,7 @@ func (e *Element) DetachHandler(handler *EventHandler) {
  *
  **/
 // EXTERN_C  HLDOM_RESULT HLAPI HTMLayoutUpdateElementEx(HELEMENT he, UINT flags);
-//sys HTMLayoutUpdateElementEx(he uintptr, flags uint) (ret HLDOM_RESULT) = htmlayout.HTMLayoutUpdateElementEx
+//sys HTMLayoutUpdateElementEx(he HELEMENT, flags uint) (ret HLDOM_RESULT) = htmlayout.HTMLayoutUpdateElementEx
 
 func (e *Element) Update(restyle, restyleDeep, remeasure, remeasureDeep, render bool) {
 	var flags uint
@@ -428,7 +425,7 @@ func (e *Element) Update(restyle, restyleDeep, remeasure, remeasureDeep, render 
 	if render {
 		flags |= REDRAW_NOW
 	}
-	if ret := HTMLayoutUpdateElementEx(uintptr(e.handle), flags); ret != HLDOM_OK {
+	if ret := HTMLayoutUpdateElementEx(e.handle, flags); ret != HLDOM_OK {
 		domPanic2(ret, "Failed to update element")
 	}
 }

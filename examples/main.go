@@ -2,6 +2,7 @@ package main
 
 import (
 	"fmt"
+	"log"
 	"runtime"
 	"syscall"
 	"unsafe"
@@ -62,6 +63,19 @@ func WinMain(Inst win.HINSTANCE) int32 {
 	return int32(msg.WParam)
 }
 
+func ui(hwnd win.HWND) {
+	el := gohl.GetRootElement(hwnd)
+	rs := el.Select("#button")
+	el = rs[0]
+	handler := &gohl.EventHandler{
+		OnMouse: func(he gohl.HELEMENT, params *gohl.MouseParams) bool {
+			log.Println("button clicked", params)
+			return true
+		},
+	}
+	el.AttachHandler(handler)
+}
+
 // func DefWindowProc(hWnd HWND, Msg uint32, wParam, lParam uintptr) uintptr
 func WndProc(hWnd win.HWND, message uint32, wParam uintptr, lParam uintptr) uintptr {
 	var pbHandled gohl.BOOL
@@ -77,6 +91,7 @@ func WndProc(hWnd win.HWND, message uint32, wParam uintptr, lParam uintptr) uint
 		if err := gohl.LoadFile(hWnd, "a.html"); err != nil {
 			println("LoadFile failed", err.Error())
 		}
+		go ui(hWnd)
 	default:
 		return win.DefWindowProc(hWnd, message, wParam, lParam)
 	}

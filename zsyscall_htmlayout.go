@@ -109,31 +109,31 @@ func HTMLayoutDataReady(hwnd HWND, uri *uint16, data []byte, dataLength int32) (
 	return
 }
 
-func HTMLayoutAttachEventHandler(he uintptr, pep uintptr, tag uintptr) (ret HLDOM_RESULT) {
+func HTMLayoutAttachEventHandler(he HELEMENT, pep uintptr, tag uintptr) (ret HLDOM_RESULT) {
 	r0, _, _ := syscall.Syscall(procHTMLayoutAttachEventHandler.Addr(), 3, uintptr(he), uintptr(pep), uintptr(tag))
 	ret = HLDOM_RESULT(r0)
 	return
 }
 
-func HTMLayoutDetachEventHandler(he uintptr, pep uintptr, tag uintptr) (ret HLDOM_RESULT) {
+func HTMLayoutDetachEventHandler(he HELEMENT, pep uintptr, tag uintptr) (ret HLDOM_RESULT) {
 	r0, _, _ := syscall.Syscall(procHTMLayoutDetachEventHandler.Addr(), 3, uintptr(he), uintptr(pep), uintptr(tag))
 	ret = HLDOM_RESULT(r0)
 	return
 }
 
-func HTMLayoutAttachEventHandlerEx(he uintptr, pep uintptr, tag uintptr, subscription uint) (ret HLDOM_RESULT) {
+func HTMLayoutAttachEventHandlerEx(he HELEMENT, pep uintptr, tag uintptr, subscription uint) (ret HLDOM_RESULT) {
 	r0, _, _ := syscall.Syscall6(procHTMLayoutAttachEventHandlerEx.Addr(), 4, uintptr(he), uintptr(pep), uintptr(tag), uintptr(subscription), 0, 0)
 	ret = HLDOM_RESULT(r0)
 	return
 }
 
-func HTMLayoutWindowAttachEventHandler(hwndLayout uintptr, pep uintptr, tag uintptr, subscription uint) (ret HLDOM_RESULT) {
+func HTMLayoutWindowAttachEventHandler(hwndLayout HWND, pep uintptr, tag uintptr, subscription uint) (ret HLDOM_RESULT) {
 	r0, _, _ := syscall.Syscall6(procHTMLayoutWindowAttachEventHandler.Addr(), 4, uintptr(hwndLayout), uintptr(pep), uintptr(tag), uintptr(subscription), 0, 0)
 	ret = HLDOM_RESULT(r0)
 	return
 }
 
-func HTMLayoutWindowDetachEventHandler(hwndLayout uintptr, pep uintptr, tag uintptr) (ret HLDOM_RESULT) {
+func HTMLayoutWindowDetachEventHandler(hwndLayout HWND, pep uintptr, tag uintptr) (ret HLDOM_RESULT) {
 	r0, _, _ := syscall.Syscall(procHTMLayoutWindowDetachEventHandler.Addr(), 3, uintptr(hwndLayout), uintptr(pep), uintptr(tag))
 	ret = HLDOM_RESULT(r0)
 	return
@@ -190,7 +190,7 @@ func HTMLayoutGetRootElement(hwnd HWND, pheT *HELEMENT) (ret HLDOM_RESULT, err e
 func HTMLayoutGetFocusElement(hwnd HWND, pheT *HELEMENT) (ret HLDOM_RESULT, err error) {
 	r0, _, e1 := syscall.Syscall(procHTMLayoutGetFocusElement.Addr(), 2, uintptr(hwnd), uintptr(unsafe.Pointer(pheT)), 0)
 	ret = HLDOM_RESULT(r0)
-	if ret == 0 {
+	if ret != 0 {
 		if e1 != 0 {
 			err = error(e1)
 		} else {
@@ -200,7 +200,7 @@ func HTMLayoutGetFocusElement(hwnd HWND, pheT *HELEMENT) (ret HLDOM_RESULT, err 
 	return
 }
 
-func HTMLayoutUpdateElementEx(he uintptr, flags uint) (ret HLDOM_RESULT) {
+func HTMLayoutUpdateElementEx(he HELEMENT, flags uint) (ret HLDOM_RESULT) {
 	r0, _, _ := syscall.Syscall(procHTMLayoutUpdateElementEx.Addr(), 2, uintptr(he), uintptr(flags), 0)
 	ret = HLDOM_RESULT(r0)
 	return

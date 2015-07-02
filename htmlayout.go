@@ -758,22 +758,22 @@ func DataReady(hwnd win.HWND, uri string, data []byte) (bool, error) {
 //typedef htmlayout_dom_element* HELEMENT
 
 // HLDOM_RESULT HLAPI HTMLayoutAttachEventHandler( HELEMENT he, LPELEMENT_EVENT_PROC pep, LPVOID tag );
-//sys HTMLayoutAttachEventHandler(he uintptr, pep uintptr, tag uintptr) (ret HLDOM_RESULT) = htmlayout.HTMLayoutAttachEventHandler
+//sys HTMLayoutAttachEventHandler(he HELEMENT, pep uintptr, tag uintptr) (ret HLDOM_RESULT) = htmlayout.HTMLayoutAttachEventHandler
 
 // EXTERN_C HLDOM_RESULT HLAPI HTMLayoutDetachEventHandler( HELEMENT he, LPELEMENT_EVENT_PROC pep, LPVOID tag );
-//sys HTMLayoutDetachEventHandler(he uintptr, pep uintptr, tag uintptr) (ret HLDOM_RESULT) = htmlayout.HTMLayoutDetachEventHandler
+//sys HTMLayoutDetachEventHandler(he HELEMENT, pep uintptr, tag uintptr) (ret HLDOM_RESULT) = htmlayout.HTMLayoutDetachEventHandler
 
 // EXTERN_C HLDOM_RESULT HLAPI HTMLayoutAttachEventHandlerEx( HELEMENT he, LPELEMENT_EVENT_PROC pep, LPVOID tag, UINT subscription );
-//sys HTMLayoutAttachEventHandlerEx(he uintptr, pep uintptr, tag uintptr, subscription uint) (ret HLDOM_RESULT) = htmlayout.HTMLayoutAttachEventHandlerEx
+//sys HTMLayoutAttachEventHandlerEx(he HELEMENT, pep uintptr, tag uintptr, subscription uint) (ret HLDOM_RESULT) = htmlayout.HTMLayoutAttachEventHandlerEx
 
 // EXTERN_C HLDOM_RESULT HLAPI HTMLayoutWindowAttachEventHandler( HWND hwndLayout, LPELEMENT_EVENT_PROC pep, LPVOID tag, UINT subscription );
-//sys HTMLayoutWindowAttachEventHandler(hwndLayout uintptr, pep uintptr, tag uintptr, subscription uint) (ret HLDOM_RESULT) = htmlayout.HTMLayoutWindowAttachEventHandler
+//sys HTMLayoutWindowAttachEventHandler(hwndLayout HWND, pep uintptr, tag uintptr, subscription uint) (ret HLDOM_RESULT) = htmlayout.HTMLayoutWindowAttachEventHandler
 
 // EXTERN_C HLDOM_RESULT HLAPI HTMLayoutWindowDetachEventHandler( HWND hwndLayout, LPELEMENT_EVENT_PROC pep, LPVOID tag );
-//sys HTMLayoutWindowDetachEventHandler(hwndLayout uintptr, pep uintptr, tag uintptr) (ret HLDOM_RESULT) = htmlayout.HTMLayoutWindowDetachEventHandler
+//sys HTMLayoutWindowDetachEventHandler(hwndLayout HWND, pep uintptr, tag uintptr) (ret HLDOM_RESULT) = htmlayout.HTMLayoutWindowDetachEventHandler
 
 func AttachWindowEventHandler(hwnd win.HWND, handler *EventHandler) {
-	key := uintptr(hwnd)
+	key := HWND(hwnd)
 	tag := uintptr(unsafe.Pointer(handler))
 
 	if _, exists := windowEventHandlers[hwnd]; exists {
@@ -796,7 +796,7 @@ func AttachWindowEventHandler(hwnd win.HWND, handler *EventHandler) {
 }
 
 func DetachWindowEventHandler(hwnd win.HWND) {
-	key := uintptr(hwnd)
+	key := HWND(hwnd)
 	if handler, exists := windowEventHandlers[hwnd]; exists {
 		tag := uintptr(unsafe.Pointer(handler))
 		if ret := HTMLayoutWindowDetachEventHandler(key, goElementProc, tag); ret != HLDOM_OK {

@@ -159,6 +159,21 @@ func utf16ToString(s *uint16) string {
 	return ""
 }
 
+func bytePtrToString(s *byte) string {
+	if s == nil {
+		panic("null cstring")
+	}
+	bs := make([]byte, 0, 256)
+	for p := uintptr(unsafe.Pointer(s)); ; p += 1 {
+		b := *(*byte)(unsafe.Pointer(p))
+		if b == 0 {
+			return string(bs)
+		}
+		bs = append(bs, b)
+	}
+	return ""
+}
+
 func utf16ToStringLength(s *uint16, length int) string {
 	if s == nil {
 		panic("null cstring")

@@ -134,7 +134,11 @@
         border-radius: 60px/20px;
       }
       button#button {
-         click!:debug("clicked");
+         click!:
+          debug("clicked", 1, "asd11111");
+      }
+      button#b2 {
+         click!:debug(1, "asdfasdfasdf",3);
       }
       
     </style>
@@ -142,7 +146,7 @@
 <body>
   <H1>border-radius css attribute support支持中文吗？使用utf8 with BOM就可以</H1>
   <button id="button">ClickMe</button>
-  <button >ClickMe2</button>
+  <button id="b2">ClickMe2</button>
   <p>No fill, same color for all borders. Mouse hover test shall obey actual shape.</p>
   <div .container #mono-color>
     <div .case1> case 1 </div>

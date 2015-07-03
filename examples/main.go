@@ -79,15 +79,23 @@ var (
 			}
 			return false
 		},
+		OnScriptCall: func(el *gohl.Element, params *gohl.XcallParams) bool {
+			log.Printf("xcall: %s %v\n\t", params.MethodName, params)
+			for i, v := range params.Argv {
+				log.Print("\t", i, uintptr(unsafe.Pointer(v)), v, v.IsString())
+			}
+			log.Println()
+			return true
+		},
 	}
 )
 
 func ui(hwnd win.HWND) {
-	// gohl.AttachWindowEventHandler(hWnd, handler)
+	gohl.AttachWindowEventHandler(hwnd, handler)
 	el := gohl.GetRootElement(hwnd)
 	rs := el.Select("#button")
 	el = rs[0]
-	el.AttachHandler(handler)
+	// el.AttachHandler(handler)
 }
 
 // func DefWindowProc(hWnd HWND, Msg uint32, wParam, lParam uintptr) uintptr

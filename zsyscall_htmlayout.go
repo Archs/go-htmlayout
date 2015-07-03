@@ -479,8 +479,8 @@ func ValueToString(pval *JsonValue, how uint) (ret uint) {
 	return
 }
 
-func ValueStringData(pval *JsonValue, pChars uintptr, pNumChars *uint) (ret uint) {
-	r0, _, _ := syscall.Syscall(procValueStringData.Addr(), 3, uintptr(unsafe.Pointer(pval)), uintptr(pChars), uintptr(unsafe.Pointer(pNumChars)))
+func ValueStringData(pval *JsonValue, pChars **uint16, pNumChars *uint) (ret uint) {
+	r0, _, _ := syscall.Syscall(procValueStringData.Addr(), 3, uintptr(unsafe.Pointer(pval)), uintptr(unsafe.Pointer(pChars)), uintptr(unsafe.Pointer(pNumChars)))
 	ret = uint(r0)
 	return
 }

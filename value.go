@@ -4,9 +4,6 @@ package gohl
 #include <htmlayout.h>
 */
 import "C"
-import (
-	"unsafe"
-)
 
 /**
  * ValueBinaryData - retreive integer data of T_BYTES type
@@ -15,7 +12,7 @@ import (
 //sys ValueBinaryData(pval *JsonValue, pBytes *uintptr, pnBytes *uint) (ret uint) = htmlayout.ValueBinaryData
 
 func (v *JsonValue) IsElement() bool {
-	return v.T == T_DOM_OBJECT
+	return v.t == T_DOM_OBJECT
 }
 
 func (v *JsonValue) ToElement() *Element {
@@ -29,7 +26,7 @@ func (v *JsonValue) ToElement() *Element {
 }
 
 func (v *JsonValue) IsString() bool {
-	return v.T == T_STRING
+	return v.t == T_STRING
 }
 
 /**
@@ -46,17 +43,18 @@ func (v *JsonValue) IsString() bool {
  * For T_FUNCTION returns name of the fuction.
  */
 // EXTERN_C UINT VALAPI ValueStringData( const VALUE* pval, LPCWSTR* pChars, UINT* pNumChars );
-//sys ValueStringData(pval *JsonValue, pChars uintptr, pNumChars *uint) (ret uint) = htmlayout.ValueStringData
+//sys ValueStringData(pval *JsonValue, pChars **uint16, pNumChars *uint) (ret uint) = htmlayout.ValueStringData
 
-func (v *JsonValue) ToString() string {
+func (v *JsonValue) String() string {
 	how := uint(C.CVT_SIMPLE)
 	if v.IsString() {
-		szValue := (*C.WCHAR)(nil)
+		var pChars *uint16
 		num := uint(0)
-		ValueStringData(v, uintptr(unsafe.Pointer(szValue)), &num)
-		return utf16ToString((*uint16)(szValue))
+		ValueStringData(v, &pChars, &num)
+		return utf16ToString(pChars)
 	}
 	t := *v
 	ValueToString(&t, how)
-	return t.ToString()
+	tt := &t
+	return tt.String()
 }

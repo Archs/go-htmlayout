@@ -10,7 +10,7 @@ type EventHandler struct {
 	OnTimer         func(he *Element, params *TimerParams) bool
 	OnBehaviorEvent func(he *Element, params *BehaviorEventParams) bool
 	OnMethodCall    func(he *Element, params *MethodParams) bool
-	OnScriptCall    func(he *Element, params *XCALL_PARAMS) bool
+	OnScriptCall    func(he *Element, params *XcallParams) bool
 	OnDataArrived   func(he *Element, params *DataArrivedParams) bool
 	OnSize          func(he *Element)
 	OnScroll        func(he *Element, params *ScrollParams) bool
@@ -34,6 +34,7 @@ func (e *EventHandler) Subscription() uint {
 	add(e.OnTimer, HANDLE_TIMER)
 	add(e.OnBehaviorEvent, HANDLE_BEHAVIOR_EVENT)
 	add(e.OnMethodCall, HANDLE_METHOD_CALL)
+	add(e.OnScriptCall, HANDLE_METHOD_CALL)
 	add(e.OnDataArrived, HANDLE_DATA_ARRIVED)
 	add(e.OnSize, HANDLE_SIZE)
 	add(e.OnScroll, HANDLE_SCROLL)

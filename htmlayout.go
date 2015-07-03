@@ -362,11 +362,19 @@ type Rect struct {
 	Bottom int32
 }
 
-type JsonValue struct {
-	T uint32
-	U uint32
-	D uint64
-}
+// typedef struct
+// {
+//   UINT   t;
+//   UINT   u;
+//   UINT64 d;
+// } VALUE;
+
+// type JsonValue struct {
+// 	T uint32
+// 	U uint32
+// 	D uint64
+// }
+type JsonValue C.VALUE
 
 type InitializationParams struct {
 	Cmd uint32
@@ -431,12 +439,35 @@ type MethodParams struct {
 //   json::value  retval;
 //   XCALL_PARAMS(LPCSTR name):method_name(name), argc(0),argv(0) { methodID = XCALL; }
 // };
-type XCALL_PARAMS struct {
+type xcall_params struct {
 	MethodParams
 	MethodName *byte
 	Argc       uint
 	Argv       *JsonValue
 	RetVal     JsonValue
+}
+
+type XcallParams struct {
+	MethodParams
+	MethodName string
+	Argc       uint
+	Argv       []*JsonValue
+	RetVal     *JsonValue
+}
+
+func (x *xcall_params) toXcallParams() *XcallParams {
+	xp := new(XcallParams)
+	xp.MethodParams = x.MethodParams
+	xp.MethodName = bytePtrToString(x.MethodName)
+	xp.RetVal = &x.RetVal
+	xp.Argc = x.Argc
+	xp.Argv = make([]*JsonValue, 0)
+	for i := 0; i < int(x.Argc); i++ {
+		p := uintptr(unsafe.Pointer(x.Argv)) + uintptr(i)*unsafe.Sizeof(x.Argv)
+		println(i, p)
+		xp.Argv = append(xp.Argv, (*JsonValue)(unsafe.Pointer(p)))
+	}
+	return xp
 }
 
 // TODO: Add all the structures derived from MethodParams here...
@@ -594,8 +625,9 @@ var goElementProc = syscall.NewCallback(func(tag uintptr, he unsafe.Pointer, evt
 	case C.HANDLE_METHOD_CALL:
 		p := (*MethodParams)(params)
 		if p.MethodId == XCALL && handler.OnScriptCall != nil {
-			xp := (*XCALL_PARAMS)(params)
-			handler.OnScriptCall(el, xp)
+			xp := (*xcall_params)(params)
+			nxp := xp.toXcallParams()
+			handled = handler.OnScriptCall(el, nxp)
 		} else {
 			if handler.OnMethodCall != nil {
 				handled = handler.OnMethodCall(el, p)

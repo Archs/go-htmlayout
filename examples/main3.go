@@ -2,8 +2,10 @@ package main
 
 import (
 	"fmt"
+	"log"
 	"runtime"
 	"syscall"
+	"unsafe"
 
 	"github.com/Archs/go-htmlayout"
 	"github.com/lxn/win"
@@ -16,11 +18,39 @@ func init() {
 func main() {
 	inst := win.GetModuleHandle(nil)
 	r := WinMain(inst)
-	fmt.Println("WinMain函数返回", r)
+	fmt.Println("WinMain:", r)
+}
+
+var (
+	handler = gohl.EventHandler{
+		OnBehaviorEvent: func(el *gohl.Element, params *gohl.BehaviorEventParams) bool {
+			log.Println("OnBehaviorEvent:", el, params, "|", gohl.BUTTON_CLICK)
+			if params.Cmd == gohl.BUTTON_CLICK {
+				log.Println("button clicked")
+			}
+			return false
+		},
+		OnScriptCall: func(el *gohl.Element, params *gohl.XcallParams) bool {
+			log.Printf("xcall: %s %v\n\t", params.MethodName, params)
+			for i, v := range params.Argv {
+				log.Print("\t", i, uintptr(unsafe.Pointer(v)), v, v.IsString())
+			}
+			log.Println()
+			return true
+		},
+	}
+)
+
+func ui(hwnd win.HWND) {
+	gohl.AttachWindowEventHandler(hwnd, &handler)
+	el := gohl.GetRootElement(hwnd)
+	rs := el.Select("#button")
+	el = rs[0]
+	// el.AttachHandler(handler)
 }
 
 func WinMain(Inst win.HINSTANCE) int32 {
-	// 2. 创建窗口
+	// CreateWindowEx
 	wnd := win.CreateWindowEx(win.WS_EX_APPWINDOW,
 		syscall.StringToUTF16Ptr(gohl.GetClassName()),
 		nil,
@@ -34,10 +64,10 @@ func WinMain(Inst win.HINSTANCE) int32 {
 		Inst,
 		nil)
 	if wnd == 0 {
-		fmt.Println("创建窗口失败", win.GetLastError())
+		fmt.Println("CreateWindowEx failed:", win.GetLastError())
 		return 0
 	}
-	fmt.Println("创建窗口成功", wnd)
+	fmt.Println("ok CreateWindowEx", wnd)
 	win.ShowWindow(wnd, win.SW_SHOW)
 	win.UpdateWindow(wnd)
 	// load file
@@ -46,11 +76,10 @@ func WinMain(Inst win.HINSTANCE) int32 {
 		println("LoadFile failed", err.Error())
 		return 0
 	}
-	// ui(wnd)
+	ui(wnd)
 
-	// 3. 主消息循环
+	// main loop
 	var msg win.MSG
-	msg.Message = win.WM_QUIT + 1 // 让它不等于 win.WM_QUIT
 
 	for win.GetMessage(&msg, 0, 0, 0) > 0 {
 		win.TranslateMessage(&msg)

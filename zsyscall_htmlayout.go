@@ -22,6 +22,7 @@ var (
 	procHTMLayoutWindowDetachEventHandler = modhtmlayout.NewProc("HTMLayoutWindowDetachEventHandler")
 	procHTMLayoutSetCallback = modhtmlayout.NewProc("HTMLayoutSetCallback")
 	procHTMLayoutSetupDebugOutput = modhtmlayout.NewProc("HTMLayoutSetupDebugOutput")
+	procHTMLayoutClassNameW = modhtmlayout.NewProc("HTMLayoutClassNameW")
 	procHTMLayout_UseElement = modhtmlayout.NewProc("HTMLayout_UseElement")
 	procHTMLayout_UnuseElement = modhtmlayout.NewProc("HTMLayout_UnuseElement")
 	procHTMLayoutCreateElement = modhtmlayout.NewProc("HTMLayoutCreateElement")
@@ -150,6 +151,12 @@ func HTMLayoutSetCallback(hWndHTMLayout uintptr, cb uintptr, cbParam uintptr) {
 
 func HTMLayoutSetupDebugOutput(param uintptr, pfOutput uintptr) {
 	syscall.Syscall(procHTMLayoutSetupDebugOutput.Addr(), 2, uintptr(param), uintptr(pfOutput), 0)
+	return
+}
+
+func HTMLayoutClassName() (ret *uint16) {
+	r0, _, _ := syscall.Syscall(procHTMLayoutClassNameW.Addr(), 0, 0, 0, 0)
+	ret = (*uint16)(unsafe.Pointer(r0))
 	return
 }
 

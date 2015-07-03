@@ -909,3 +909,21 @@ var debugToConsole = syscall.NewCallback(func(param uintptr, char int) int {
 func EnableDebug() {
 	HTMLayoutSetupDebugOutput(0, debugToConsole)
 }
+
+/**Get name of HTMLayout window class.
+ *
+ * \return \b LPCWSTR, name of HTMLayout window class.
+ *
+ * Use this function if you wish to create unicode version of HTMLayout.
+ * The returned name can be used in CreateWindow(Ex)W function.
+ * You can use #HTMLayoutClassNameT macro.
+ **/
+// EXTERN_C LPCWSTR HLAPI HTMLayoutClassNameW();
+//sys HTMLayoutClassName() (ret *uint16) = htmlayout.HTMLayoutClassNameW
+func GetClassName() string {
+	r := HTMLayoutClassName()
+	if r == nil {
+		return ""
+	}
+	return utf16ToString(r)
+}

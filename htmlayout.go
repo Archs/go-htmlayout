@@ -467,6 +467,17 @@ func (x *xcall_params) toXcallParams() *XcallParams {
 		println(i, p)
 		xp.Argv = append(xp.Argv, (*JsonValue)(unsafe.Pointer(p)))
 	}
+
+	// xp.Argv = (*[1 << 30]*JsonValue)(unsafe.Pointer(x.Argv))[:x.Argc:x.Argc]
+
+	// length := int(x.Argc)
+	// hdr := reflect.SliceHeader{
+	// 	Data: uintptr(unsafe.Pointer(x.Argv)),
+	// 	Len:  length,
+	// 	Cap:  length,
+	// }
+	// xp.Argv = *(*[]*JsonValue)(unsafe.Pointer(&hdr))
+	log.Println("xp.Argv", xp.Argc, xp.Argv)
 	return xp
 }
 
